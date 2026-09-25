@@ -1,0 +1,73 @@
+/*
+ * Jax World Carwash-O-Matic design tokens.
+ * Jet-age roadside Americana meets robot telemetry: cream enamel, charcoal
+ * technical sections, chrome neutrals, burnt-orange accent, cyan reserved for
+ * sensing/scan states, red only for status.
+ * The site deliberately commits to one look in both OS themes.
+ */
+:root {
+  color-scheme: light;
+  --cream: #f3ebdd;
+  --cream-2: #e8dcc6;
+  --cream-3: #d9cbb1;
+  --paper-ink: #1d1b18;
+  --paper-muted: #5f574c;
+
+  --ink: #131518;
+  --ink-2: #1b1e22;
+  --ink-3: #262a2f;
+  --ink-line: #33383e;
+  --ink-text: #ece5d8;
+  --ink-muted: #9a9ea4;
+
+  --chrome: #c9cdd2;
+  --steel: #8a9098;
+  --orange: #d9622b;
+  --orange-2: #f08a4b;
+  --cyan: #3fe0e8;
+  --green: #5fe08a;
+  --red: #e5483b;
+
+  --f-display: 'Unbounded', 'Arial Black', 'Helvetica Neue', sans-serif;
+  --f-script: 'Yellowtail', 'Brush Script MT', cursive;
+  --f-body: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* type scale (fluid) */
+  --t-xs: 0.72rem;
+  --t-sm: 0.84rem;
+  --t-md: 1rem;
+  --t-lg: clamp(1.1rem, 0.95rem + 0.5vw, 1.3rem);
+  --t-xl: clamp(1.6rem, 1.1rem + 1.6vw, 2.4rem);
+  --t-2xl: clamp(2.2rem, 1.3rem + 3vw, 4rem);
+  --t-3xl: clamp(2.6rem, 1.2rem + 4.8vw, 5.6rem);
+
+  --gutter: clamp(16px, 4vw, 56px);
+  /* Fixed header: overlays in the pinned scene start below this line. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --header-bottom: calc(var(--safe-top) + 72px);
+  --maxw: 1240px;
+  --radius: 14px;
+  /* frosted panel behind text that sits over the moving 3D scene */
+  --panel-bg: rgba(20, 22, 26, 0.58);
+  --panel-border: rgba(236, 229, 216, 0.1);
+  --panel-blur: blur(12px) saturate(1.1);
+  --anno-blur: blur(6px);
+  --header-blur: blur(14px) saturate(1.2);
+  --header-bg: rgba(19, 21, 24, 0.72);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/*
+ * Touch devices: backdrop blur over the live WebGL canvas is expensive on
+ * phone GPUs, so panels use a denser solid tint instead.
+ */
+@media (pointer: coarse), (max-width: 760px) {
+  :root {
+    --panel-bg: rgba(20, 22, 26, 0.84);
+    --panel-blur: none;
+    --anno-blur: none;
+    --header-blur: none;
+    --header-bg: rgba(19, 21, 24, 0.94);
+  }
+}

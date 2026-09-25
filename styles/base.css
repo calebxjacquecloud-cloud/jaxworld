@@ -1,0 +1,319 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+  /* scroll anchoring fights the pinned, scroll-driven scene; keep positions exact */
+  overflow-anchor: none;
+  /*
+   * Never let anything widen the page (iOS would let it pan sideways).
+   * Set on the root only: overflow on <body> would make it a scroll container
+   * and break the sticky, pinned scenes.
+   */
+  overflow-x: hidden;
+}
+body {
+  overflow-anchor: none;
+}
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--ink-text);
+  font-family: var(--f-body);
+  font-size: var(--t-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img,
+svg {
+  max-width: 100%;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+  /* a single long word in the wide display face must wrap, not widen the page */
+  overflow-wrap: break-word;
+}
+p {
+  margin: 0;
+}
+a {
+  color: inherit;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--orange-2);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.mono {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange-2);
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.28em 0.7em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.status-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-chip--vision {
+  color: var(--orange);
+}
+.status-chip--prototype {
+  color: #2a8a8f;
+}
+.status-chip--future {
+  color: var(--steel);
+}
+[hidden] {
+  display: none !important;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--orange);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+.skip:focus {
+  top: 12px;
+}
+
+/* ── site header ── */
+.site-header {
+  position: fixed;
+  z-index: 50;
+  top: calc(var(--safe-top) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 1320px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px 8px 18px;
+  border-radius: 999px;
+  background: var(--header-bg);
+  border: 1px solid rgba(201, 205, 210, 0.14);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
+}
+.logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  text-decoration: none;
+  color: var(--ink-text);
+  white-space: nowrap;
+}
+.logo__jax {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+.logo__world {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  color: var(--chrome);
+}
+.logo__script {
+  font-family: var(--f-script);
+  font-size: 1.45rem;
+  line-height: 0.8;
+  color: var(--orange-2);
+  transform: rotate(-4deg) translateY(2px);
+  display: inline-block;
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.site-nav a {
+  text-decoration: none;
+  font-size: var(--t-sm);
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  transition: color 0.2s, background 0.2s;
+}
+.site-nav a:hover {
+  color: var(--ink-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+.site-nav .site-nav__cta {
+  background: var(--orange);
+  color: #1a0e07;
+  font-weight: 600;
+}
+.site-nav .site-nav__cta:hover {
+  background: var(--orange-2);
+  color: #1a0e07;
+}
+@media (max-width: 860px) {
+  .site-nav a:not(.site-nav__cta) {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .site-header {
+    padding: 6px 6px 6px 14px;
+  }
+  .site-nav__long {
+    display: none;
+  }
+  .logo__world {
+    font-size: 0.56rem;
+    letter-spacing: 0.18em;
+  }
+  .logo {
+    gap: 0.5em;
+  }
+  .logo__jax {
+    font-size: 0.85rem;
+  }
+  .logo__script {
+    font-size: 1rem;
+    transform: none;
+  }
+  .site-nav .site-nav__cta {
+    padding: 7px 12px;
+  }
+}
+
+/* ── shared section shells ── */
+.section {
+  position: relative;
+  padding-block: clamp(80px, 12vw, 160px);
+  padding-inline: var(--gutter);
+}
+.section--cream {
+  background: var(--cream);
+  color: var(--paper-ink);
+}
+.section--ink {
+  background: var(--ink);
+  color: var(--ink-text);
+}
+.section--ink-2 {
+  background: var(--ink-2);
+  color: var(--ink-text);
+}
+.section__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+.section__head {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+  max-width: 62rem;
+  margin-bottom: clamp(36px, 6vw, 72px);
+}
+.section__title {
+  font-size: var(--t-2xl);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.section__lede {
+  font-size: var(--t-lg);
+  max-width: 42rem;
+  color: inherit;
+  opacity: 0.82;
+}
+.section--cream .eyebrow {
+  color: var(--orange);
+}
+.section--cream .section__lede {
+  color: var(--paper-muted);
+  opacity: 1;
+}
+.logo__burst {
+  width: 18px;
+  height: 18px;
+  color: var(--orange);
+  align-self: center;
+  margin-right: 2px;
+}
+
+/* phones: display headings sized so the longest words (e.g. INFRASTRUCTURE) fit */
+@media (max-width: 560px) {
+  .section__title {
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
+  }
+  .section__lede {
+    font-size: 1rem;
+  }
+}
+/* smallest phones (320px): tighten the header lockup so it fits */
+@media (max-width: 360px) {
+  .logo__burst {
+    display: none;
+  }
+  .logo {
+    gap: 0.4em;
+  }
+  .logo__script {
+    font-size: 0.92rem;
+  }
+  .site-nav .site-nav__cta {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+  .eyebrow {
+    gap: 0.5em;
+    letter-spacing: 0.1em;
+  }
+}
