@@ -67,7 +67,7 @@ export const SCROLL = {
     speed: 0.022,
     /** Shortest and longest time a single step may take, in seconds. */
     minDuration: 1.1,
-    maxDuration: 3.2,
+    maxDuration: 4.2,
     /** Minimum finger travel (px) that counts as a swipe. */
     swipeThreshold: 28,
   },

@@ -105,7 +105,8 @@ export default function WashExperience() {
         <WashCopy bus={bus} />
         <WashTimeline bus={bus} />
         {stepped && <StepControls bus={bus} progress={steps} sectionRef={sectionRef} />}
-        <FastLane bus={bus} sectionRef={sectionRef} progress={stepped ? steps : scrubbed} stops={SWIPE_STOPS} stepped={stepped} />
+        {/* desktop only: phones get Start / Back / Next instead */}
+        {!stepped && <FastLane bus={bus} sectionRef={sectionRef} />}
       </div>
     </section>
   );

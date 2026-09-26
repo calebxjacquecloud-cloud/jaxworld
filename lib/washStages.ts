@@ -75,8 +75,10 @@ const INTRO_STOPS = [0.08, 0.16, 0.24, 0.32, 0.43, 0.52, 0.6, 0.68, 0.78, 0.9, 0
  * midpoint between each pair, so one swipe covers half the ground.
  */
 export const SWIPE_STOPS: number[] = [
-  // prelude (data/preludeSequence.ts): PRELUDE.length × prelude progress
-  ...[0, 0.14, 0.22, 0.31, 0.37, 0.48, 0.54, 0.65, 0.71, 0.82, 0.88].map((u) => PRELUDE.length * u),
+  // prelude (data/preludeSequence.ts): PRELUDE.length × prelude progress. One step per statement:
+  // garage → (Start) out of the garage and round the first corner to "The problem" → each Next
+  // takes the next corner and brings up the next statement.
+  ...[0, 0.37, 0.54, 0.71, 0.88].map((u) => PRELUDE.length * u),
   // main timeline
   ...KEY_STOPS.flatMap((t, i) => (i === 0 ? [t] : [(KEY_STOPS[i - 1] + t) / 2, t])).map((t) => mainToScroll(t, PRELUDE.length)),
   // meet the machine
