@@ -2,6 +2,8 @@
  * Prelude set: the Jax World garage (with Jacque and the teaser printed on
  * its door) and the streets the car drives before it reaches the bay.
  *
+ * Door: Jacque and "Car washes are outdated."; sign: the Jax World lockup.
+ *
  * Streets are simple ribbons on a grid ground: asphalt, dashed edge lines and
  * a cross street at every corner, so each turn reads as an intersection. The
  * last street runs straight into the arrival lane painted on the bay floor.
@@ -23,7 +25,6 @@ const G_H = 3.7;
 const INK = '#23201A';
 const PAPER = '#EDE3CE';
 const RUST = '#B5502F';
-const DENIM = '#3E5266';
 
 const mascotSrc: string = typeof jacque === 'string' ? jacque : (jacque as { src: string }).src;
 
@@ -164,31 +165,25 @@ function drawDoor(c: HTMLCanvasElement, mascot: HTMLImageElement | null) {
 
   // Jacque, on the left
   if (mascot && mascot.width) {
-    const mh = h * 0.9;
+    const mh = h * 0.81;
     const mw = (mascot.width / mascot.height) * mh;
-    g.drawImage(mascot, w * 0.04, h * 0.05, mw, mh);
+    g.drawImage(mascot, w * 0.03, (h - mh) / 2, mw, mh);
   }
 
   // teaser, on the right
-  const x = w * 0.43;
-  const col = w * 0.53;
+  const x = w * 0.48;
+  const col = w * 0.49;
   const display = (px: number) => `800 ${px}px "Unbounded", "Arial Black", sans-serif`;
   g.textBaseline = 'alphabetic';
-  g.fillStyle = RUST;
-  fit(g, 'JAX WORLD · EST. 1993', col, h * 0.045, (px) => `500 ${px}px "IBM Plex Mono", monospace`);
-  g.fillText('JAX WORLD · EST. 1993', x, h * 0.2);
   g.fillStyle = INK;
   fit(g, 'CAR WASHES', col, h * 0.135, display);
-  g.fillText('CAR WASHES', x, h * 0.38);
-  g.fillText('ARE', x, h * 0.53);
+  g.fillText('CAR WASHES', x, h * 0.36);
+  g.fillText('ARE', x, h * 0.51);
   g.fillStyle = RUST;
-  g.fillText('OUTDATED.', x, h * 0.68);
-  g.fillStyle = DENIM;
-  fit(g, 'We’re reinventing the car wash.', col, h * 0.1, (px) => `${px}px "Yellowtail", "Brush Script MT", cursive`);
-  g.fillText('We’re reinventing the car wash.', x, h * 0.82);
+  g.fillText('OUTDATED.', x, h * 0.66);
   g.fillStyle = INK;
   fit(g, 'SCROLL TO OPEN  ↓', col, h * 0.038, (px) => `500 ${px}px "IBM Plex Mono", monospace`);
-  g.fillText('SCROLL TO OPEN  ↓', x, h * 0.93);
+  g.fillText('SCROLL TO OPEN  ↓', x, h * 0.8);
 }
 
 function drawSign(c: HTMLCanvasElement) {
@@ -200,17 +195,22 @@ function drawSign(c: HTMLCanvasElement) {
   g.strokeStyle = PAPER;
   g.lineWidth = 6;
   g.strokeRect(10, 10, w - 20, h - 20);
-  starburst(g, h * 0.55, h / 2, h * 0.3, '#f08a4b');
-  g.fillStyle = PAPER;
+  // starburst + JAX WORLD, centred as one lockup
   g.textBaseline = 'middle';
-  g.font = `800 ${h * 0.42}px "Unbounded", "Arial Black", sans-serif`;
-  g.fillText('JAX', h * 1.0, h * 0.52);
+  const big = `800 ${h * 0.42}px "Unbounded", "Arial Black", sans-serif`;
+  const small = `400 ${h * 0.2}px "Unbounded", "Arial Black", sans-serif`;
+  g.font = big;
   const jw = g.measureText('JAX ').width;
-  g.font = `400 ${h * 0.2}px "Unbounded", "Arial Black", sans-serif`;
-  g.fillText('W O R L D', h * 1.0 + jw, h * 0.54);
-  g.fillStyle = '#f08a4b';
-  fit(g, 'Carwash-O-Matic', w * 0.44, h * 0.44, (px) => `${px}px "Yellowtail", "Brush Script MT", cursive`);
-  g.fillText('Carwash-O-Matic', w * 0.53, h * 0.54);
+  g.font = small;
+  const ww = g.measureText('W O R L D').width;
+  const burst = h * 0.75;
+  const x0 = (w - (burst + jw + ww)) / 2;
+  starburst(g, x0 + burst * 0.4, h / 2, h * 0.3, '#f08a4b');
+  g.fillStyle = PAPER;
+  g.font = big;
+  g.fillText('JAX', x0 + burst, h * 0.52);
+  g.font = small;
+  g.fillText('W O R L D', x0 + burst + jw, h * 0.54);
 }
 
 export class Prelude {
