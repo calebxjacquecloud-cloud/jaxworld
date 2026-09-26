@@ -96,7 +96,7 @@ const check = (name, ok, detail) => {
   await p.waitForTimeout(1500);
   check('page did not scroll while stepping', (await p.evaluate(() => scrollY)) === 0);
   check('swipe back steps', await swipe(-200));
-  for (let i = 0; i < 110; i++) {
+  for (let i = 0; i < 160; i++) {
     await swipe(200);
     await p.waitForTimeout(30);
   }

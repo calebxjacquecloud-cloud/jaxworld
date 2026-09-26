@@ -52,8 +52,15 @@ const initial: ChannelValues = {
   vPortraitK: 0.45,
   // detail window: 0 closed, 1 open
   inset: 0,
-  /** 1 = keep the detail window closed on phones (the completion checklist uses that space). */
-  insetPhoneOff: 0,
+  /** 1 = the window sits in the lower left (desktop "meet the machine" close-ups). */
+  insetLL: 0,
+  /** 1 = the window shows the tool-head model instead of the bay (CLEAN). */
+  toolView: 0,
+  /** Supply line being highlighted on the tool head, 0–5 (0 = none yet). */
+  hoseStep: 0,
+  toolAz: 14,
+  toolEl: 20,
+  toolDist: 2.0,
   // detail camera (orbit around target), shown in the detail window
   camAz: 30,
   camEl: 7,
@@ -184,10 +191,10 @@ M(0.212, 0.23, { wire: 0, marker: 0 });
 
 /* ─────────────── SCENE 3 · ARMS DEPLOY (0.20–0.25) ─────────────── */
 M(0.2, 0.232, { envelope: 1, paths: 1 });
-A(0.2, { ...tuck(1, ARM_PARK.x, ARM_PARK.z), spray: 0, mode: 0 });
-B(0.2, { ...tuck(-1, -ARM_PARK.x, -ARM_PARK.z), spray: 0, mode: 0 });
-A(0.234, tuck(1, 3.0, 1.4));
-B(0.236, tuck(-1, -3.0, -1.4));
+A(0.224, { ...tuck(1, ARM_PARK.x, ARM_PARK.z), spray: 0, mode: 0 });
+B(0.224, { ...tuck(-1, -ARM_PARK.x, -ARM_PARK.z), spray: 0, mode: 0 });
+A(0.237, tuck(1, 3.0, 1.4));
+B(0.239, tuck(-1, -3.0, -1.4));
 A(0.247, { base: [2.7, 2.2], aim: top(0.45, 2.1), off: [0.35, 0.62, 0.1] });
 B(0.248, { base: [-2.7, -2.2], aim: top(-0.45, -2.3), off: [-0.35, 0.62, -0.1] });
 
@@ -226,6 +233,13 @@ B(0.345, { mode: 1, off: [-0.5, 0.75, 0] });
 A(0.347, { spray: 1 }, 'out');
 B(0.348, { spray: 1 }, 'out');
 M(0.348, 0.428, { foam: 1 }, 'linear');
+// CLEAN · the one-nozzle, five-line tool head, in the detail window
+M(0.342, 0.3421, { toolView: 1 });
+M(0.344, 0.356, { inset: 1 });
+M(0.344, 0.43, { toolAz: 40, toolDist: 1.8 }, 'linear');
+M(0.356, 0.42, { hoseStep: 5 }, 'linear');
+M(0.428, 0.438, { inset: 0 });
+M(0.439, 0.4391, { toolView: 0 });
 {
   const n = 8;
   const t0 = 0.349;
@@ -350,10 +364,6 @@ M(0.908, 0.92, { wire: 0, beams: 0 });
 
 /* ─────────────── SCENE 12 · HERO REVEAL (0.92–1.00) ─────────────── */
 M(0.922, 0.962, { carYaw: -4, camRise: 0, camActive: 0 });
-// detail window reopens on a finished three-quarter shot and slowly orbits
-M(0.92, 0.921, { insetPhoneOff: 1, camAz: 30, camEl: 11, camDist: 7.4, camTx: 0, camTy: 0.5, camTz: 0.1 });
-M(0.926, 0.94, { inset: 1 });
-M(0.926, 1, { camAz: 56, camDist: 7.0 }, 'linear');
 
 export const WASH_TRACKS = tb.build();
 export const WASH_CHANNELS = Object.keys(initial);

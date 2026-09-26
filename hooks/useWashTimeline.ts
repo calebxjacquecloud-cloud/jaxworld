@@ -17,7 +17,7 @@ export interface FrameContext {
   t: number;
   /** Overall progress through the section (0–1), intro included. */
   p: number;
-  /** Intro progress: 0 before it, 1 after it (always 0 when the intro is off). */
+  /** Intro progress inside a 'meet the machine' splice (0–1); 0 whenever no splice is playing. */
   u: number;
   /** Outro ("pack it up") progress: 0 until the wash ends, then 0→1. */
   o: number;
@@ -35,12 +35,12 @@ export interface FrameBus {
 }
 
 /**
- * Where the scroll is: prelude `pre`, main timeline `t`, desktop intro `u`, outro `o`.
+ * Where the scroll is: prelude `pre`, main timeline `t`, intro splices `u`, outro `o`.
  *
  * Desktop (scrub): progress 0–1 covers prelude + main + intro + outro, so it is
- * stretched to that combined length; the prelude comes first and the intro is
- * spliced in at INTRO.at.
- * Touch (stepped): progress already runs 0 → PRELUDE + 1 + OUTRO lengths (see SWIPE_STOPS).
+ * stretched to that combined length; the prelude comes first and the intro
+ * splices are inserted at their `at` points.
+ * Touch (stepped): progress is already on that combined axis (see SWIPE_STOPS).
  * Reduced motion (desktop): each chapter snaps to its hold frame; the outro
  * snaps to its final frame.
  */
@@ -53,11 +53,11 @@ function mapProgress(
 ) {
   const P = PRELUDE.length;
   const L = OUTRO.length;
-  let E: number;
+  const splices = intro ? INTRO.splices : [];
+  const D = intro ? INTRO.length : 0;
+  let E = stepped ? v : v * (P + 1 + D + L);
   out.u = 0;
   out.o = 0;
-  if (stepped) E = v;
-  else E = v * (P + 1 + (intro ? INTRO.length : 0) + L);
   // prelude (garage + road trip) comes first
   if (E < P) {
     out.pre = discrete ? (E < P * 0.5 ? 0 : 1) : Math.max(0, E / P);
@@ -66,17 +66,15 @@ function mapProgress(
   }
   out.pre = 1;
   E -= P;
-  if (!stepped && intro) {
-    const D = INTRO.length;
-    if (E >= INTRO.at && E < INTRO.at + D) {
-      out.t = INTRO.at;
-      out.u = (E - INTRO.at) / D;
+  // "meet the machine" splices: the main timeline holds while each plays
+  for (const s of splices) {
+    if (E < s.at) break;
+    if (E < s.at + s.length) {
+      out.t = s.at;
+      out.u = Math.max(1e-4, s.u0 + (s.u1 - s.u0) * ((E - s.at) / s.length));
       return out;
     }
-    if (E >= INTRO.at + D) {
-      E -= D;
-      out.u = 1;
-    }
+    E -= s.length;
   }
   if (E <= 1) out.t = discrete ? discreteProgress(Math.max(0, E)) : Math.max(0, E);
   else {
@@ -101,7 +99,7 @@ export function useWashTimeline(
   sectionRef: RefObject<HTMLElement>,
   progress: ProgressRef,
   sceneRef: RefObject<WashScene | null>,
-  /** Play the desktop "meet the bay" intro (data/introSequence.ts). */
+  /** Play the 'meet the machine' splices (data/introSequence.ts). */
   intro: boolean,
 ): FrameBus {
   const listeners = useRef(new Set<FrameFn>());
@@ -155,7 +153,7 @@ export function useWashTimeline(
       if (split.pre < 1) sampleAll(PRELUDE_TRACKS, split.pre, state);
       else for (const k of PRELUDE_ONLY_CHANNELS) state[k] = 0;
       ctx.t = split.t;
-      ctx.p = progress.stepped ? p / (PRELUDE.length + 1 + OUTRO.length) : p;
+      ctx.p = progress.stepped ? p / (PRELUDE.length + 1 + INTRO.length + OUTRO.length) : p;
       ctx.u = split.u;
       ctx.o = split.o;
       ctx.pre = split.pre;

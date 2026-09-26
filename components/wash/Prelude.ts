@@ -224,7 +224,8 @@ export class Prelude {
   private mascot: HTMLImageElement | null = null;
   private owned: THREE.Material[] = [];
 
-  constructor() {
+  /** @param onRepaint called after late-loading art (Jacque, brand fonts) is redrawn, so the scene can render a fresh frame. */
+  constructor(private onRepaint: () => void = () => {}) {
     // ribbons are built without caring about winding, so draw both faces
     const asphalt = new THREE.MeshStandardMaterial({ color: '#2a2e33', roughness: 0.95, metalness: 0, side: THREE.DoubleSide });
     const paint = new THREE.MeshBasicMaterial({ color: '#ece5d8', transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide });
@@ -303,6 +304,7 @@ export class Prelude {
     this.doorTex.needsUpdate = true;
     drawSign(this.signCanvas);
     this.signTex.needsUpdate = true;
+    this.onRepaint();
   }
 
   private buildGarage() {

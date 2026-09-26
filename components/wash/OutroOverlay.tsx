@@ -44,9 +44,9 @@ export default function OutroOverlay({ bus }: { bus: FrameBus }) {
   return (
     <div className="packlist" ref={panel}>
       <p className="eyebrow">
-        14 · Pack up <span className="packlist__count mono" ref={count}>0/{PACK_LIST.length}</span>
+        The system <span className="packlist__count mono" ref={count}>0/{PACK_LIST.length}</span>
       </p>
-      <h2 className="packlist__title">One 40 ft high-cube container.</h2>
+      <h2 className="packlist__title">Everything packs inside.</h2>
       <ol className="packlist__rows">
         {PACK_LIST.map((g, i) => (
           <li
@@ -63,7 +63,7 @@ export default function OutroOverlay({ bus }: { bus: FrameBus }) {
           </li>
         ))}
       </ol>
-      <p className="packlist__note">Design target: the complete system in one standard shipping container.</p>
+      <p className="packlist__note">Design target: the complete system in one standard 40 ft shipping container.</p>
     </div>
   );
 }

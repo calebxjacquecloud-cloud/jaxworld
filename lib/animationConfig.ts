@@ -12,11 +12,38 @@
 export const PRELUDE = { length: 0.34 };
 
 /**
- * Desktop-only "meet the bay" intro, spliced into the scroll right after the
- * camera pylons rise (see data/introSequence.ts). While it plays, the main
- * timeline holds at `at`; `length` is extra scroll, as a fraction of the main timeline.
+ * "Meet the machine" close-ups (see data/introSequence.ts), on every device.
+ * One 0–1 intro timeline is played in pieces ("splices") at points in the main
+ * timeline; while a splice plays, the main timeline holds at `at`.
+ *   see  · right after the camera pylons rise: the eyes
+ *   move · just before the arms leave their parking spots: the hands
+ * `length` is extra scroll, as a fraction of the main timeline.
  */
-export const INTRO = { at: 0.0995, length: 0.14 };
+export interface Splice {
+  id: string;
+  at: number;
+  length: number;
+  /** Portion of the intro timeline this splice plays. */
+  u0: number;
+  u1: number;
+}
+const SPLICES: Splice[] = [
+  { id: 'see', at: 0.0995, length: 0.07, u0: 0, u1: 0.45 },
+  { id: 'move', at: 0.222, length: 0.075, u0: 0.45, u1: 1 },
+];
+export const INTRO = { splices: SPLICES, length: SPLICES.reduce((a, s) => a + s.length, 0) };
+
+/** Overall (unnormalized) scroll position of main-timeline time `t`, splices included. */
+export function mainToScroll(t: number, preludeLength: number): number {
+  let e = preludeLength + t;
+  for (const s of SPLICES) if (t > s.at) e += s.length;
+  return e;
+}
+/** Overall scroll position of intro progress `u` (inside its splice). */
+export function introToScroll(u: number, preludeLength: number): number {
+  const s = SPLICES.find((x) => u >= x.u0 && u <= x.u1) ?? SPLICES[SPLICES.length - 1];
+  return mainToScroll(s.at, preludeLength) + s.length * ((u - s.u0) / (s.u1 - s.u0));
+}
 
 /**
  * "Pack it up" outro, appended after the main timeline on every device (see

@@ -1,18 +1,19 @@
 /**
- * "Meet the bay" intro (desktop only).
+ * "Meet the machine" close-ups (every device).
  *
- * Plays on its own 0–1 timeline, spliced into the scroll right after the
- * camera pylons rise (INTRO.at). While it runs, the main wash timeline holds
- * still and these channels are layered on top:
+ * One 0–1 timeline, played in two splices at different points of the main
+ * wash timeline (INTRO.splices in lib/animationConfig.ts); the main timeline
+ * holds while each plays:
  *
- *   1 · green rings draw around the eight camera pylons; the close-up window
- *       opens in the lower left on a single camera, with a callout beside it
- *   2 · the camera rings fade, rings draw around the two robot arms, and the
- *       window shows a whole arm
- *   3 · the window wipes to the tool head: one nozzle fed by five supply lines
+ *   0.00–0.45 · SEE   right after the camera pylons rise: green rings draw
+ *               around the eight cameras, the close-up window shows one of
+ *               them, and a callout names them "the eyes"
+ *   0.45–1.00 · MOVE  just before the arms leave their parking spots: rings
+ *               draw around both arms, the window shows a whole arm, and a
+ *               callout names them "the hands"
  *
- * Channels shared with the main timeline (inset, cam*, camActive) only
- * override it inside the intro; intro-only channels read 0 outside it.
+ * Channels shared with the main timeline (inset, cam*, camActive, insetLL…)
+ * only override it inside a splice; intro-only channels read 0 outside.
  */
 
 import { TrackBuilder, type ChannelValues } from '@/lib/timeline';
@@ -41,6 +42,9 @@ const HEAD_Y = CAMERA_ARRAY.mastHeight + 0.2;
 
 const shared: ChannelValues = {
   inset: 0,
+  /** 1 = the close-up window sits in the lower left (desktop) instead of the upper right. */
+  insetLL: 1,
+  toolView: 0,
   camAz: 118,
   camEl: 9,
   camDist: 1.8,
@@ -53,10 +57,6 @@ const shared: ChannelValues = {
 };
 
 const only: ChannelValues = {
-  /** 1 = the close-up window sits in the lower left instead of the upper right. */
-  insetLL: 1,
-  /** 1 = the window shows the tool-head model instead of the bay. */
-  toolView: 0,
   ringCam: 0,
   ringCamOut: 0,
   ringArm: 0,
@@ -65,12 +65,6 @@ const only: ChannelValues = {
   linkArm: 0,
   call1: 0,
   call2: 0,
-  call3: 0,
-  /** Supply line being highlighted, 0–5 (0 = none yet). */
-  hoseStep: 0,
-  toolAz: 14,
-  toolEl: 20,
-  toolDist: 2.0,
 };
 
 export const INTRO_ONLY_CHANNELS = Object.keys(only);
@@ -78,34 +72,23 @@ export const INTRO_ONLY_CHANNELS = Object.keys(only);
 const tb = new TrackBuilder({ ...shared, ...only });
 const M = (t0: number, t1: number, set: ChannelValues, e: Parameters<typeof tb.move>[3] = 'inOut') => tb.move(t0, t1, set, e);
 
-/* ── 1 · cameras: the eyes ── */
-M(0.0, 0.14, { ringCam: 1 }, 'linear');
-M(0.02, 0.16, { camActive: 1 }, 'linear');
-M(0.12, 0.17, { focusRing: 1 });
-M(0.14, 0.19, { inset: 1 });
-M(0.18, 0.23, { call1: 1 });
-M(0.19, 0.36, { camAz: 76, camDist: 1.55 }, 'linear');
-M(0.35, 0.39, { call1: 0, inset: 0, focusRing: 0 });
-M(0.38, 0.43, { ringCamOut: 1 });
+/* ── SEE (0–0.45): the cameras, the eyes ── */
+M(0.0, 0.15, { ringCam: 1 }, 'linear');
+M(0.02, 0.17, { camActive: 1 }, 'linear');
+M(0.13, 0.18, { focusRing: 1 });
+M(0.15, 0.2, { inset: 1 });
+M(0.19, 0.24, { call1: 1 });
+M(0.2, 0.39, { camAz: 76, camDist: 1.55 }, 'linear');
+M(0.37, 0.41, { call1: 0, inset: 0, focusRing: 0 });
+M(0.39, 0.44, { ringCamOut: 1, camActive: 0 });
 
-/* ── 2 · robot arms: the physical motion ── */
-M(0.4, 0.401, { camAz: 232, camEl: 14, camDist: 6.6, camTx: -ARM_PARK.x, camTy: 1.25, camTz: -ARM_PARK.z });
-M(0.42, 0.52, { ringArm: 1 }, 'linear');
-M(0.5, 0.54, { linkArm: 1 });
-M(0.52, 0.56, { inset: 1 });
-M(0.55, 0.59, { call2: 1 });
-M(0.56, 0.68, { camAz: 206, camDist: 6.1 }, 'linear');
-
-/* ── 3 · the tool head (window wipes to a new close-up) ── */
-M(0.68, 0.71, { inset: 0, call2: 0 });
-M(0.705, 0.706, { toolView: 1 });
-M(0.71, 0.75, { inset: 1 });
-M(0.74, 0.78, { call3: 1 });
-M(0.71, 0.93, { toolAz: 40, toolDist: 1.8 }, 'linear');
-M(0.77, 0.91, { hoseStep: 5 }, 'linear');
-
-/* ── out: back to the main sequence ── */
-M(0.92, 0.97, { inset: 0, call3: 0, linkArm: 0, ringArmOut: 1, camActive: 0 });
-M(0.975, 0.976, { toolView: 0 });
+/* ── MOVE (0.45–1): the robot arms, the hands (arms still in their parking spots) ── */
+M(0.45, 0.451, { camActive: 0.35, camAz: 232, camEl: 14, camDist: 6.6, camTx: -ARM_PARK.x, camTy: 1.25, camTz: -ARM_PARK.z });
+M(0.47, 0.6, { ringArm: 1 }, 'linear');
+M(0.58, 0.62, { linkArm: 1 });
+M(0.6, 0.65, { inset: 1 });
+M(0.64, 0.7, { call2: 1 });
+M(0.65, 0.9, { camAz: 206, camDist: 6.1 }, 'linear');
+M(0.88, 0.97, { inset: 0, call2: 0, linkArm: 0, ringArmOut: 1 });
 
 export const INTRO_TRACKS = tb.build();

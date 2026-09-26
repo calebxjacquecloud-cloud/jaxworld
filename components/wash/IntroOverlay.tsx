@@ -42,9 +42,10 @@ function drawLink(el: SVGLineElement | null, from: ScreenPoint, r: number, to: {
 }
 
 /**
- * Desktop "meet the bay" intro overlays: green rings drawn around the camera
- * pylons and robot arms, leader lines to the close-up window, the callouts
- * beside the window, and numbered tags on the tool head's supply lines.
+ * "Meet the machine" overlays: green rings drawn around the camera pylons
+ * (SEE) and robot arms (MOVE), a leader to the close-up window, and the
+ * callouts beside it. Also the numbered tags on the tool head's supply lines,
+ * shown whenever the close-up window shows the tool head (CLEAN).
  */
 export default function IntroOverlay({ bus }: { bus: FrameBus }) {
   const root = useRef<SVGSVGElement>(null);
@@ -53,20 +54,27 @@ export default function IntroOverlay({ bus }: { bus: FrameBus }) {
   const focusRing = useRef<SVGCircleElement>(null);
   const linkArm = useRef<SVGLineElement>(null);
   const calls = useRef<(HTMLDivElement | null)[]>([]);
-  const hoseItems = useRef<(HTMLLIElement | null)[]>([]);
   const tags = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
     const pt: ScreenPoint = { x: 0, y: 0, visible: false };
+    const phone = window.matchMedia('(max-width: 760px), (max-aspect-ratio: 9/10)');
     let active = true;
     return bus.add(({ u, state: s, scene }) => {
+      // CLEAN: numbered tags on the tool head's supply lines, whenever the window shows it
+      if (scene && s.toolView > 0.5) {
+        SUPPLY_LINES.forEach((_, i) => {
+          scene.projectTool(i, pt);
+          setFade(tags.current[i], pt.visible ? 1 : 0, `translate3d(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px, 0)`);
+        });
+      } else tags.current.forEach((el) => setFade(el, 0));
+
       const on = u > 0 && u < 1 && !!scene;
       if (!on) {
         if (active) {
           active = false;
           if (root.current) root.current.style.visibility = 'hidden';
           calls.current.forEach((el) => setFade(el, 0));
-          tags.current.forEach((el) => setFade(el, 0));
         }
         return;
       }
@@ -76,7 +84,7 @@ export default function IntroOverlay({ bus }: { bus: FrameBus }) {
       const box = sc.inset;
       const corner = { x: box.x + box.w, y: box.y };
 
-      // 1 · camera rings, drawn one after another around the ring of pylons
+      // SEE · camera rings, drawn one after another around the ring of pylons
       const n = Math.min(PYLONS, sc.pylonCount);
       const camFade = 1 - s.ringCamOut;
       for (let i = 0; i < n; i++) {
@@ -88,28 +96,19 @@ export default function IntroOverlay({ bus }: { bus: FrameBus }) {
       sc.projectPylon(FOCUS_PYLON, pt);
       drawCircle(focusRing.current, pt.x, pt.y, CAM_R + 16, s.focusRing, camFade);
 
-      // 2 · arm rings
+      // MOVE · arm rings
       const armFade = 1 - s.ringArmOut;
       for (const i of [0, 1] as const) {
         sc.projectArm(i, pt);
         drawCircle(armRings.current[i], pt.x, pt.y, ARM_R, clamp01(s.ringArm * 1.6 - i * 0.6), armFade);
       }
       sc.projectArm(FOCUS_ARM as 0 | 1, pt);
-      drawLink(linkArm.current, pt, ARM_R, corner, s.linkArm);
+      drawLink(linkArm.current, pt, phone.matches ? 0 : ARM_R, corner, phone.matches ? 0 : s.linkArm);
 
-      // callouts sit to the right of the close-up window, bottom-aligned with it (CSS)
-      const cx = box.x + box.w + 24;
-      [s.call1, s.call2, s.call3].forEach((o, i) => {
+      // callouts: right of the lower-left close-up (desktop), or across the bottom (phones, via CSS)
+      const cx = phone.matches ? 0 : box.x + box.w + 24;
+      [s.call1, s.call2].forEach((o, i) => {
         setFade(calls.current[i], o, `translate3d(${cx}px, ${((1 - o) * 10).toFixed(1)}px, 0)`);
-      });
-
-      // 3 · supply lines light up one by one, with numbered tags on the model
-      const lit = Math.ceil(s.hoseStep);
-      hoseItems.current.forEach((li, i) => li?.classList.toggle('is-on', i < lit));
-      hoseItems.current.forEach((li, i) => li?.classList.toggle('is-now', i === lit - 1));
-      SUPPLY_LINES.forEach((_, i) => {
-        sc.projectTool(i, pt);
-        setFade(tags.current[i], pt.visible ? s.call3 : 0, `translate3d(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px, 0)`);
       });
     });
   }, [bus]);
@@ -158,9 +157,16 @@ export default function IntroOverlay({ bus }: { bus: FrameBus }) {
           calls.current[0] = el;
         }}
       >
-        <p className="eyebrow">The eyes · camera pylons ×8</p>
-        <h3 className="intro__title">Cameras are the eyes of the AI.</h3>
-        <p className="intro__body">They read the car&rsquo;s surface, memorize its geometry and mark the areas that need focused cleaning.</p>
+        <p className="eyebrow">01 · See</p>
+        <h3 className="intro__title">The eyes.</h3>
+        <p className="intro__body">Eight cameras map the vehicle before cleaning begins.</p>
+        <ul className="intro__list">
+          <li>Body geometry</li>
+          <li>Wheels</li>
+          <li>Sensitive areas</li>
+          <li>Existing marks</li>
+          <li>Areas that need extra attention</li>
+        </ul>
       </div>
 
       <div
@@ -169,36 +175,9 @@ export default function IntroOverlay({ bus }: { bus: FrameBus }) {
           calls.current[1] = el;
         }}
       >
-        <p className="eyebrow">The hands · robotic arms ×2</p>
-        <h3 className="intro__title">The physical motion for the AI model.</h3>
-        <p className="intro__body">Each arm rides its own floor stage and carries the nozzle wherever the vision model&rsquo;s cleaning path sends it.</p>
-      </div>
-
-      <div
-        className="intro__call"
-        ref={(el) => {
-          calls.current[2] = el;
-        }}
-      >
-        <p className="eyebrow">The tool head</p>
-        <h3 className="intro__title">One nozzle. Five supply lines.</h3>
-        <ol className="intro__hoses">
-          {SUPPLY_LINES.map((l, i) => (
-            <li
-              key={l.id}
-              style={{ '--tone': l.color } as React.CSSProperties}
-              ref={(el) => {
-                hoseItems.current[i] = el;
-              }}
-            >
-              <span className="intro__swatch mono">{i + 1}</span>
-              <span>
-                {l.label}
-                {'note' in l && <span className="intro__note"> · {l.note}</span>}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <p className="eyebrow">03 · Move</p>
+        <h3 className="intro__title">The hands.</h3>
+        <p className="intro__body">Two robotic arms, each riding its own floor track. The machine moves around the car.</p>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export default function ConditionPanel({ bus }: { bus: FrameBus }) {
       bus.add(({ t }) => {
         const el = panel.current;
         if (!el) return;
-        const o = windowed(t, 0.168, 0.216, 0.008);
+        const o = windowed(t, 0.168, 0.2, 0.008);
         setFade(el, o);
         if (o <= 0) return;
         let queued = 0;

@@ -16,11 +16,28 @@ project without re-deriving decisions or breaking things that were fixed.
 ## What it is
 
 Investor/demo site for an early-stage autonomous, touchless, robotic car-wash
-concept. The heart of the page is a pinned 3D wash demo driven by scroll
-(desktop) or swipes (phone). Below it are supporting sections: how it works,
-3D-printer motion analogy, deployment, physical
-AI thesis, autonomous fleets, interior cleaning (future phase), operations
-dashboard mock, call to action, footer disclaimer.
+concept. The story follows the owner's "Revised Website Narrative" and moves
+through five acts, shown by the act indicator in the header:
+
+01 PROBLEM · 02 MACHINE · 03 SYSTEM · 04 NETWORK · 05 FUTURE
+
+1. Garage door ("Car washes are outdated.") → road trip, one turn per beat:
+   the problem (scrubbing paint) → the old model (same wash for every car) →
+   why now (market $9.6B → $12.3B, source line slot in `MARKET_SOURCE`) → the
+   opening (touchless + detailing, why not both?).
+2. Product reveal ("Introducing the Carwash-O-Matic") → SEE (eyes close-up)
+   → THINK (cleaning plan) → MOVE (hands close-up) → CLEAN (tool head, five
+   lines) → ADAPT → DETAIL ("Automated detailing, one area at a time") →
+   VERIFY → full-screen CONDITION RECORD.
+3. "What if a car wash wasn't a building?" → everything packs into the
+   container → "One system. One container. Ready to move."
+4. Below the demo, only outward: where it goes → the network → physical AI
+   thesis → autonomous future → short roadmap → final vision (container
+   livery + "Autonomous cleaning for the autonomous age.") → CTA (one primary
+   "Request the Jax World brief", Jacque) → collapsed "How it works" reference.
+
+Fast lane after the garage opens: "View the 60-second experience" and "Skip
+to overview". Never restart the product explanation after the container.
 
 ## Naming (decided by the owner, keep exactly)
 
@@ -69,7 +86,7 @@ each broken at least once:
 | `data/preludeSequence.ts` / `lib/roadPath.ts` / `components/wash/Prelude.ts` | Garage + road-trip prelude before the wash (every device): its 0–1 timeline and the four turn statements / the street route (rounded right-angle corners, ends exactly at the arrival path's drive 0.3) / garage (door with Jacque + teaser, canvas-drawn), streets and cross streets. Mascot art: `assets/jacque-sticker.png` (from the brand kit PPTX). |
 | `data/outroSequence.ts` | "Pack it up" outro on its own 0–1 track after the main timeline (every device): car drives out, hidden utilities rise, container slides in, `PACK_PLAN` loads every unit into its slot, roof + wall close, livery shot. Also the outro copy and the packing checklist groups (`PACK_LIST`). |
 | `components/wash/Utilities.ts` / `ShippingContainer.ts` / `OutroOverlay.tsx` | Utility-row equipment models / the 40 ft container with folding wall and canvas-drawn livery / the packing checklist (rows slide in as a group lifts, green check when it lands). |
-| `data/introSequence.ts` | Desktop-only "meet the bay" intro on its own 0–1 timeline, spliced in at `INTRO.at` (lib/animationConfig.ts) while the main timeline holds. Also the tool-head supply lines and the arm park position. |
+| `data/introSequence.ts` | "Meet the machine" close-ups (SEE eyes, MOVE hands) on one 0–1 timeline, played in two splices (`INTRO.splices` in lib/animationConfig.ts) while the main timeline holds; every device. Also the tool-head supply lines and the arm park position. |
 | `components/wash/IntroOverlay.tsx` / `ToolHead.ts` | Intro rings, leader, callouts and hose tags / the tool-head close-up model (own small scene, rendered in the detail window). |
 | `data/washSequence.ts` | The whole choreography as named channels (main view `v*`, detail camera `cam*` + `inset`, vehicle, two robot arms, spray, foam, scan effects) plus the 3D-anchored HTML annotations. `M(t0, t1, {...})` = camera/effect moves; `A()`/`B()` = arm waypoints. |
 | `lib/washStages.ts` | 12 chapters with 0–1 ranges, `SWIPE_STOPS` (69 phone steps: key stops plus midpoints), all scroll-timed copy. |
@@ -101,6 +118,7 @@ geometry.
 
 ## Recent changes (latest first)
 
+- Rebuilt to the revised narrative (see "What it is"). New: act indicator (`components/ActIndicator.tsx`, `lib/acts.ts`), fast lane (`components/wash/FastLane.tsx`), full-screen vehicle record (`components/wash/VehicleRecord.tsx`), final vision (`components/FinalVision.tsx`, livery in `lib/livery.ts`), collapsed reference (`components/HowItWorks.tsx`). SEE/MOVE close-ups now on phones; tool head moved into CLEAN. Header hidden until the garage opens. Nav/skip jumps cut straight to the target instead of scrubbing through. Placeholder emails still in `components/sections/CallToAction.tsx`.
 - Prelude before the wash: garage door with Jacque and "Car washes are outdated." → door swings up, car pulls out, view rises to top-down and rides with the car (car fixed on screen, streets turn beneath it) → four turns, one statement each (market $9.6B→$12.3B, 20-year stall, damage, touchless + detailing) → hands off into the existing opening shot. Scroll order is now prelude → wash → (desktop intro) → outro; see `mapProgress`.
 - Outro: removed the floating equipment labels; the view stays zoomed out on the objects and a "14 · Pack up" checklist fills in one item at a time, each getting a green check as it lands in the container.
 - 3D "pack it up" ending after the finale (desktop and phones): car drives out; water storage, pressurization skid, 4 chemistry tubs, control/compute + network cabinets and hose reels rise from a utility row; a 40 ft container slides in; rails, stage bridges, utilities, 8 pylons and both arms pack in one by one; roof lowers, long wall folds up to show the Jax World Carwash-O-Matic livery. Replaced the old illustrated "Modular" section (removed); the Modular nav link jumps into the ending (desktop anchor inside the wash section, phones jump to that step). Scroll mapping lives in `hooks/useWashTimeline.ts` (`mapProgress`).

@@ -6,6 +6,7 @@ import { setFade } from '@/lib/domWrite';
 
 /** What the detail window is looking at, by timeline position. */
 const LABELS: [number, string][] = [
+  [0.445, 'TOOL HEAD · ONE NOZZLE, FIVE LINES'],
   [0.53, 'DRIVER SIDE'],
   [0.578, 'FRONT WHEEL · TRACE'],
   [0.63, 'REAR WHEEL · TRACE'],
@@ -15,9 +16,8 @@ const LABELS: [number, string][] = [
 
 /** Intro captions, by intro progress. */
 const INTRO_LABELS: [number, string][] = [
-  [0.4, 'CAMERA PYLON 01'],
-  [0.7, 'ROBOTIC ARM B'],
-  [1.01, 'TOOL HEAD · 1 NOZZLE, 5 LINES'],
+  [0.45, 'CAMERA PYLON 01'],
+  [1.01, 'ROBOTIC ARM B'],
 ];
 
 /**

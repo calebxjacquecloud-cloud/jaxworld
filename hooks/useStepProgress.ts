@@ -49,11 +49,15 @@ export function useStepProgress(
     };
     const canStep = (dir: 1 | -1) => engaged() && (dir > 0 ? index < last : index > 0);
 
-    const goTo = (i: number) => {
+    const goTo = (i: number, instant = false) => {
       index = Math.max(0, Math.min(last, i));
       const target = stops[index];
       const dist = Math.abs(target - proxy.value);
       tween?.kill();
+      if (instant) {
+        proxy.value = proxy.raw = target;
+        return;
+      }
       tween = gsap.to(proxy, {
         value: target,
         raw: target,
@@ -123,7 +127,8 @@ export function useStepProgress(
       if (idx === undefined || idx < 0) return;
       e.preventDefault();
       window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
-      goTo(idx);
+      // a jump cuts straight to the step instead of playing everything in between
+      goTo(idx, true);
     };
     document.addEventListener('click', onLink);
 

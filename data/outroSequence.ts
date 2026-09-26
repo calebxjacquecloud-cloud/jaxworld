@@ -186,29 +186,22 @@ export const OUTRO_TRACKS = tb.build();
 
 export const OUTRO_COPY: CopyBlock[] = [
   {
-    id: 'driveout',
-    in: 0.035,
-    out: 0.19,
-    place: 'left',
-    eyebrow: '12 · Drive out',
-    title: 'Clean car out. Bay clear.',
-    body: 'The next vehicle pulls straight in.',
-  },
-  {
-    id: 'canmove',
-    in: 0.22,
+    id: 'building',
+    in: 0.2,
     out: 0.37,
     place: 'left',
-    eyebrow: '13 · Modular',
-    title: 'Car wash infrastructure that can move.',
-    body: 'Everything behind the wash, most of it never on screen: water, pressure, chemistry, compute, hoses, tracks, cameras and arms.',
+    eyebrow: 'The system',
+    title: 'What if a car wash wasn’t a building?',
+    big: true,
+    body: 'Water system. Chemistry. Compute. Robotics. Cameras. Controls.',
   },
   {
     id: 'shipped',
     in: 0.955,
     out: 1.2,
     place: 'bottom',
-    eyebrow: 'Ready to ship',
-    title: 'Unfolds wherever there’s power and water.',
+    eyebrow: 'Ready to move',
+    title: 'One system. One container. Ready to move.',
+    lines: ['Deploy where the demand is.'],
   },
 ];

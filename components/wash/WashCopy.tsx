@@ -6,6 +6,7 @@ import { WASH_COPY } from '@/lib/washStages';
 import { OUTRO_COPY } from '@/data/outroSequence';
 import { PRELUDE_COPY, type PreludeBlock } from '@/data/preludeSequence';
 import { OUTRO, PRELUDE } from '@/lib/animationConfig';
+import { SUPPLY_LINES } from '@/data/introSequence';
 import { windowed } from '@/lib/timeline';
 import { setFade } from '@/lib/domWrite';
 
@@ -21,10 +22,17 @@ const SPAN: Record<Track, number> = { prelude: PRELUDE.length, main: 1, outro: O
 /** Short scroll-timed statements. Opacity and drift are written per frame, never via React state. */
 export default function WashCopy({ bus }: { bus: FrameBus }) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const hoses = useRef<(HTMLLIElement | null)[]>([]);
 
   useEffect(
     () =>
-      bus.add(({ t, o: outro, pre }) => {
+      bus.add(({ t, o: outro, pre, state }) => {
+        // CLEAN: supply lines light up one by one with the tool-head close-up
+        const lit = Math.ceil(state.hoseStep ?? 0);
+        hoses.current.forEach((li, j) => {
+          li?.classList.toggle('is-on', j < lit);
+          li?.classList.toggle('is-now', j === lit - 1);
+        });
         BLOCKS.forEach(({ c, track }, i) => {
           const el = refs.current[i];
           if (!el) return;
@@ -53,6 +61,23 @@ export default function WashCopy({ bus }: { bus: FrameBus }) {
           {c.eyebrow && <p className="eyebrow">{c.eyebrow}</p>}
           {c.title && <h2 className="wash-copy__title">{c.title}</h2>}
           {c.body && <p className="wash-copy__body">{c.body}</p>}
+          {c.note && <p className="wash-copy__note">{c.note}</p>}
+          {c.hoses && (
+            <ol className="intro__hoses">
+              {SUPPLY_LINES.map((l, j) => (
+                <li
+                  key={l.id}
+                  style={{ '--tone': l.color } as React.CSSProperties}
+                  ref={(el) => {
+                    hoses.current[j] = el;
+                  }}
+                >
+                  <span className="intro__swatch mono">{j + 1}</span>
+                  <span>{l.label}</span>
+                </li>
+              ))}
+            </ol>
+          )}
           {c.stats && (
             <dl className="wash-copy__stats">
               {c.stats.map((st) => (
@@ -63,6 +88,7 @@ export default function WashCopy({ bus }: { bus: FrameBus }) {
               ))}
             </dl>
           )}
+          {c.source && <p className="wash-copy__source mono">{c.source}</p>}
           {c.lines && (
             <ul className="wash-copy__lines">
               {c.lines.map((l) => (

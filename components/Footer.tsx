@@ -11,10 +11,12 @@ export default function Footer() {
           <span className="logo__script">Carwash-O-Matic</span>
         </div>
         <nav className="footer__nav" aria-label="Footer">
-          <a href="#wash">The wash</a>
-          <a href="#motion">Motion system</a>
-          <a href="#modular">Modular</a>
-          <a href="#platform">Platform</a>
+          <a href="#machine">Machine</a>
+          <a href="#modular">System</a>
+          <a href="#deploy">Where it goes</a>
+          <a href="#platform">Network</a>
+          <a href="#future">Future</a>
+          <a href="#how">How it works</a>
           <a href="#contact">Contact</a>
         </nav>
         <p className="footer__disclaimer">

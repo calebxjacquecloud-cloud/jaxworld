@@ -56,18 +56,18 @@ export default function OperationsPlatform() {
     links.current.forEach((l, i) => {
       if (l) l.style.strokeDashoffset = String(1 - clamp01((p - 0.05 - i * 0.05) / 0.2));
     });
-    if (counter.current) counter.current.textContent = String(Math.round(412 * clamp01(p / 0.5)));
+    if (counter.current) counter.current.textContent = String(Math.round(3 * clamp01(p / 0.5)));
   });
 
   return (
-    <section id="platform" ref={sectionRef} className="section section--ink-2 ops" aria-labelledby="ops-title">
+    <section id="platform" data-act="4" ref={sectionRef} className="section section--ink-2 ops" aria-labelledby="ops-title">
       <div className="section__inner">
         <SectionHead
           id="ops-title"
-          eyebrow="Operating platform"
+          eyebrow="The network"
           status="vision"
-          title="Centralized intelligence. Distributed infrastructure."
-          lede="The proposed operating model: every Jax World location reports to one control platform. Robot health, wash quality, chemistry, cameras and exceptions are watched centrally, so each site needs relatively little local labor to run to the same standard."
+          title="One machine becomes many."
+          lede="Centralized intelligence. Distributed infrastructure. Multiple locations, multiple machines, one platform."
         />
 
         <div className="console" role="group" aria-label="Concept operations console with sample data">
@@ -78,32 +78,38 @@ export default function OperationsPlatform() {
             <span className="console__sample">Concept interface · sample data · no live network</span>
           </div>
 
-          <div className="console__kpis">
-            <div className="kpi">
-              <p className="kpi__k">Locations online</p>
+          <ul className="console__kpis">
+            <li className="kpi">
+              <p className="kpi__k">System health</p>
               <p className="kpi__v mono">
-                5<span className="kpi__of">/5</span>
+                5<span className="kpi__of">/5 online</span>
               </p>
-            </div>
-            <div className="kpi">
-              <p className="kpi__k">Vehicles cleaned today</p>
-              <p className="kpi__v mono">
-                <span ref={counter}>412</span>
-              </p>
-            </div>
-            <div className="kpi">
-              <p className="kpi__k">Wash quality · first-pass verified</p>
+            </li>
+            <li className="kpi">
+              <p className="kpi__k">Wash quality</p>
               <p className="kpi__v mono">
                 97.8<span className="kpi__of">%</span>
               </p>
-            </div>
-            <div className="kpi">
-              <p className="kpi__k">Maintenance alerts</p>
+            </li>
+            <li className="kpi">
+              <p className="kpi__k">Chemistry</p>
               <p className="kpi__v mono">
-                3 <Pill s="warn" text="2 attention" /> <Pill s="critical" text="1 paused" />
+                <Pill s="warn" text="1 low" />
               </p>
-            </div>
-          </div>
+            </li>
+            <li className="kpi">
+              <p className="kpi__k">Camera status</p>
+              <p className="kpi__v mono">
+                39<span className="kpi__of">/40</span>
+              </p>
+            </li>
+            <li className="kpi">
+              <p className="kpi__k">Exceptions</p>
+              <p className="kpi__v mono">
+                <span ref={counter}>3</span>
+              </p>
+            </li>
+          </ul>
 
           <div className="console__main">
             <div className="console__table-wrap">
@@ -111,11 +117,10 @@ export default function OperationsPlatform() {
                 <thead>
                   <tr>
                     <th scope="col">Location</th>
-                    <th scope="col">Robots</th>
+                    <th scope="col">System</th>
                     <th scope="col">Cameras</th>
                     <th scope="col">Chemistry</th>
-                    <th scope="col">Water</th>
-                    <th scope="col">Exception flag</th>
+                    <th scope="col">Exception</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -130,9 +135,6 @@ export default function OperationsPlatform() {
                       <td className="mono">{s.cams}</td>
                       <td>
                         <Level v={s.chem} label="Chemistry level" />
-                      </td>
-                      <td>
-                        <Level v={s.water} label="Water level" />
                       </td>
                       <td className="console__flag">{s.flag}</td>
                     </tr>
@@ -171,24 +173,12 @@ export default function OperationsPlatform() {
                   HQ
                 </text>
               </svg>
-              <div className="console__log mono" aria-label="Remote diagnostics log, sample entries">
-                <p className="console__log-title">Remote diagnostics</p>
-                <p>
-                  <span>09:41</span> S05 arm B · scheduled E-stop test · paused by operator
-                </p>
-                <p>
-                  <span>09:37</span> S03 camera C4 · contrast drop · wipe cycle queued
-                </p>
-                <p>
-                  <span>09:30</span> S04 foam concentrate 19% · refill ordered
-                </p>
-                <p>
-                  <span>09:12</span> S02 vehicle 4Q72 · FLAG 01 cleared · record filed
-                </p>
-              </div>
             </div>
           </div>
         </div>
+        <p className="ops__close">
+          The physical machines are local. <em>The intelligence doesn&rsquo;t have to be.</em>
+        </p>
       </div>
     </section>
   );

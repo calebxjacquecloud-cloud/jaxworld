@@ -43,6 +43,13 @@ export function useScrollProgress(
         scrub: reduced ? true : scrub,
         onUpdate: (self) => {
           proxy.raw = self.progress;
+          // A jump (nav link, "skip", scrollbar drag) cuts straight to the new point instead of
+          // scrubbing through everything in between. Normal wheel/trackpad steps stay smooth.
+          if (Math.abs(self.progress - proxy.value) > 0.08) {
+            const st = self as ScrollTrigger & { getTween?: () => gsap.core.Tween | undefined };
+            st.getTween?.()?.progress(1);
+            proxy.value = self.progress;
+          }
         },
       },
     });

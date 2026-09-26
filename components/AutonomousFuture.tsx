@@ -56,15 +56,19 @@ export default function AutonomousFuture() {
   });
 
   return (
-    <section ref={sectionRef} className="section section--ink future" aria-labelledby="future-title">
+    <section id="future" data-act="5" ref={sectionRef} className="section section--ink future" aria-labelledby="future-title">
       <div className="section__inner">
         <SectionHead
           id="future-title"
-          eyebrow="The autonomous vehicle future"
+          eyebrow="The autonomous future"
           status="vision"
-          title="Vehicles may become autonomous. They still get dirty."
-          lede="As more vehicles are shared, fleet-operated and eventually driverless, fewer of them have an owner on hand to notice grime, damage or a mess. Fleets could need cleaning, inspection and condition records that run without a person present."
+          title="Autonomous vehicles still get dirty."
+          lede="And someone still has to inspect them."
         />
+        <p className="future__body">
+          As vehicles become increasingly shared, fleet-operated and autonomous, routine care cannot depend on a driver noticing what needs attention.
+        </p>
+        <p className="future__line">Vehicle care has to become autonomous too.</p>
         <ol className="future__stages">
           {STAGES.map((s, i) => (
             <li

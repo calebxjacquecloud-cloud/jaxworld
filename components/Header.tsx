@@ -1,4 +1,5 @@
 import Starburst from './Starburst';
+import ActIndicator from './ActIndicator';
 
 export default function Header() {
   return (
@@ -9,13 +10,14 @@ export default function Header() {
         <span className="logo__world">WORLD</span>
         <span className="logo__script">Carwash-O-Matic</span>
       </a>
+      <ActIndicator />
       <nav className="site-nav" aria-label="Primary">
-        <a href="#wash">The wash</a>
-        <a href="#motion">Motion</a>
-        <a href="#modular">Modular</a>
-        <a href="#platform">Platform</a>
+        <a href="#machine">Machine</a>
+        <a href="#modular">System</a>
+        <a href="#platform">Network</a>
+        <a href="#future">Future</a>
         <a className="site-nav__cta" href="#contact">
-          Partner<span className="site-nav__long"> with Jax World</span>
+          Request<span className="site-nav__long"> the brief</span>
         </a>
       </nav>
     </header>

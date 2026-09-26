@@ -7,8 +7,8 @@ import { clamp01 } from '@/lib/timeline';
 import SectionHead from './SectionHead';
 
 /**
- * DEPLOY. OPERATE. RELOCATE. SCALE.
- * Four small isometric sites; the container drops into each in turn as you scroll.
+ * WHERE IT GOES: one machine, different environments. The same container
+ * drops into four very different sites in turn as you scroll.
  */
 
 const S = 13;
@@ -71,8 +71,8 @@ function Container({ lift }: { lift: number }) {
 const SITES = [
   {
     id: 'urban',
-    name: 'Urban parking lot',
-    note: 'Level-one parking, a few bays',
+    name: 'Urban parking',
+    note: 'A compact site where permanent construction may not make sense.',
     ground: '#2a2f35',
     scene: (
       <>
@@ -92,8 +92,8 @@ const SITES = [
   },
   {
     id: 'depot',
-    name: 'Autonomous fleet depot',
-    note: 'Driverless fleet, overnight cycles',
+    name: 'Fleet depot',
+    note: 'Vehicles cleaned and inspected while they are already parked.',
     ground: '#23272c',
     scene: (
       <>
@@ -109,9 +109,27 @@ const SITES = [
     ),
   },
   {
+    id: 'airport',
+    name: 'Airport rental return',
+    note: 'Clean. Inspect. Record. Turn around.',
+    ground: '#262a2f',
+    scene: (
+      <>
+        {(() => {
+          const a = iso([0, 0, 8], S);
+          const t = iso([0, 5, 8], S);
+          const r = iso([2.4, 0.6, 8], S);
+          return <polygon points={`${a[0]},${a[1]} ${t[0]},${t[1]} ${r[0]},${r[1]}`} fill="#c9cdd2" />;
+        })()}
+        <Car x={3} z={9} color="#ece5d8" />
+        <Car x={3} z={11.2} color="#8a9098" />
+      </>
+    ),
+  },
+  {
     id: 'retail',
-    name: 'Retail car-wash site',
-    note: 'Roadside, drive-up customers',
+    name: 'Retail car wash',
+    note: 'The familiar use case, rebuilt around robotic infrastructure.',
     ground: '#2f343a',
     scene: (
       <>
@@ -130,24 +148,6 @@ const SITES = [
           );
         })()}
         <Car x={4} z={10} color="#b23a2e" />
-      </>
-    ),
-  },
-  {
-    id: 'airport',
-    name: 'Airport rental-car return',
-    note: 'High turnover between renters',
-    ground: '#262a2f',
-    scene: (
-      <>
-        {(() => {
-          const a = iso([0, 0, 8], S);
-          const t = iso([0, 5, 8], S);
-          const r = iso([2.4, 0.6, 8], S);
-          return <polygon points={`${a[0]},${a[1]} ${t[0]},${t[1]} ${r[0]},${r[1]}`} fill="#c9cdd2" />;
-        })()}
-        <Car x={3} z={9} color="#ece5d8" />
-        <Car x={3} z={11.2} color="#8a9098" />
       </>
     ),
   },
@@ -175,14 +175,13 @@ export default function DeploymentVisual() {
   );
 
   return (
-    <section ref={sectionRef} className="section section--ink-2 deploy" aria-labelledby="deploy-title">
+    <section id="deploy" data-act="3" ref={sectionRef} className="section section--ink-2 deploy" aria-labelledby="deploy-title">
       <div className="section__inner">
         <SectionHead
           id="deploy-title"
-          eyebrow="Modular deployment"
+          eyebrow="Where it goes"
           status="vision"
-          title="Deploy. Operate. Relocate. Scale."
-          lede="A traditional wash means planning, pouring and building a dedicated facility at every location. A container-based system could reduce much of that site work to a pad, utilities and a set-down, and the same unit can move when demand moves."
+          title="One machine. Different environments."
         />
         <ul className="deploy__grid">
           {SITES.map((site, i) => (

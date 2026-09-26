@@ -91,47 +91,58 @@ export const PRELUDE_TRACKS = tb.build();
 
 export interface PreludeBlock extends CopyBlock {
   stats?: { year: string; value: string }[];
-  note?: string;
+  /** Citation line under the stats. Rendered only when filled in. */
+  source?: string;
 }
+
+/**
+ * Market source line for turn 3. Left empty until a citation is supplied, so
+ * no placeholder text ever shows on the live site.
+ */
+export const MARKET_SOURCE = '';
 
 export const PRELUDE_COPY: PreludeBlock[] = [
   {
-    id: 'market',
+    id: 'problem',
     in: 0.285,
     out: 0.43,
     place: 'left',
-    eyebrow: 'The market',
-    title: 'The automatic car wash industry is expected to grow at a 5% CAGR over the next 5 years.',
-    stats: [
-      { year: '2026', value: '$9.6B' },
-      { year: '2031', value: '$12.3B' },
-    ],
+    eyebrow: 'The problem',
+    title: 'Most car washes still scrub your paint.',
+    body: 'Brushes and cloth repeatedly contact the same surface they are supposed to protect.',
+    note: 'Micro-scratches today can become visible paint damage over time.',
   },
   {
-    id: 'stalled',
+    id: 'oldmodel',
     in: 0.455,
     out: 0.6,
     place: 'left',
-    eyebrow: 'The moment',
-    title: 'Commercial innovation in car washes stalled for nearly 20 years.',
-    body: 'A resurgence is happening now, in 2026.',
+    eyebrow: 'The old model',
+    title: 'The tunnel treats every car the same.',
+    body: 'Different shape. Different wheels. Different dirt.',
+    lines: ['Same wash.'],
   },
   {
-    id: 'damage',
+    id: 'market',
     in: 0.625,
     out: 0.77,
     place: 'left',
-    eyebrow: 'The problem',
-    title: 'Car washes damage vehicles.',
-    body: 'Classic contact and friction-based washes leave micro-scratches that grow into chips, which can lead to rust and long-term body damage.',
+    eyebrow: 'Why now',
+    title: 'A growing industry built on aging infrastructure.',
+    stats: [
+      { year: '2026', value: '$9.6B' },
+      { year: '2031', value: '$12.3B' },
+      { year: 'CAGR', value: '~5%' },
+    ],
+    source: MARKET_SOURCE,
   },
   {
-    id: 'both',
+    id: 'opening',
     in: 0.795,
     out: 0.91,
     place: 'left',
-    eyebrow: 'The answer',
-    title: 'Automated touchless is better. Detailing is best.',
-    lines: ['It’s time to have both.'],
+    eyebrow: 'The opening',
+    title: 'Touchless protects the vehicle. Detailing adapts to the vehicle.',
+    lines: ['Why shouldn’t one system do both?'],
   },
 ];

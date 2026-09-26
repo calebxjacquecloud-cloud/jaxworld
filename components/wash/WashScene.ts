@@ -126,11 +126,12 @@ export class WashScene {
 
     this.pylons = new CameraArray(armMats);
     this.tool = new ToolHeadScene(this.scene.environment, armMats);
-    this.prelude = new Prelude();
+    // late-loading art must trigger a render: the frame loop idles when nothing moves
+    this.prelude = new Prelude(() => (this.dirty = true));
     this.scene.add(this.prelude.group);
     this.utilities = new Utilities(armMats);
     this.scene.add(this.utilities.group);
-    this.container = new ShippingContainer(armMats.chrome);
+    this.container = new ShippingContainer(armMats.chrome, () => (this.dirty = true));
     this.scene.add(this.container.group);
     PACK_PLAN.forEach((slot, i) => this.packIndex.set(slot.id, i));
     this.scene.add(this.pylons.group);
@@ -176,7 +177,7 @@ export class WashScene {
     const w = phone ? Math.round(W * 0.44) : Math.round(Math.min(480, Math.max(280, W * 0.28)));
     const h = Math.round(w * (phone ? 0.72 : 0.625));
     const gutter = phone ? 16 : Math.min(56, Math.max(16, W * 0.04));
-    this.rectUR = { w, h, x: Math.round(W - gutter - (phone ? 0 : 20) - w), y: phone ? 84 : 90 };
+    this.rectUR = { w, h, x: Math.round(W - gutter - (phone ? 0 : 20) - w), y: phone ? 118 : 90 };
     // lower left (desktop intro): leaves room for its callout to the right
     const lw = Math.round(Math.min(400, Math.max(260, W * 0.25)));
     const lh = Math.round(lw * 0.625);
@@ -315,12 +316,13 @@ export class WashScene {
     }
 
     // ── detail window ──
-    const rect = s.insetLL > 0.5 ? this.rectLL : this.rectUR;
+    // phones keep the window in the upper right: the bottom of the screen belongs to the copy panels
+    const rect = s.insetLL > 0.5 && !this.phone ? this.rectLL : this.rectUR;
     this.inset.x = rect.x;
     this.inset.y = rect.y;
     this.inset.w = rect.w;
     this.inset.h = rect.h;
-    this.inset.open = this.phone && s.insetPhoneOff > 0.5 ? 0 : s.inset;
+    this.inset.open = s.inset;
     this.toolView = s.toolView > 0.5;
     if (this.toolView) this.tool.update(s.toolAz, s.toolEl, s.toolDist, rect.w / rect.h, s.hoseStep);
     else if (this.inset.open > 0.001) {
