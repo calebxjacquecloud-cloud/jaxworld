@@ -174,7 +174,8 @@ M(0, 0.03, { vFollow: 1, vAz: 22, vEl: 13, vDist: 13.2, vFrameX: 0.12, vMobileY:
 M(0.03, 0.058, { vAz: 12, vEl: 40, vDist: 17.5, vFrameX: 0.08, vFrameY: 0 });
 // climb to a high top-down view that holds the car, all eight camera pylons and the arm stages;
 // the main view stays here for the rest of the demo
-M(0.058, 0.094, { vFollow: 0, vTx: 0, vTy: 0, vTz: 0, vAz: 0, vEl: 89.4, vDist: 24, vFov: 32, vFrameX: 0.12, vFrameY: 0, vMobileY: 0.06, vPortraitK: 0.2 });
+M(0.058, 0.094, { vFollow: 0, vTx: 0, vTy: 0, vTz: 0, vAz: 0, vEl: 89.4, vDist: 24, vFov: 32, vFrameX: 0.12, vFrameY: 0, vMobileY: 0.13, vPortraitK: 0.56 });
+// (portrait screens pull back further, vPortraitK, so the parked robot arms stay in frame)
 
 /* ─────────────── SCENE 2 · COMPUTER-VISION SCAN (0.09–0.20) ─────────────── */
 // pylons are fully up before the desktop intro (INTRO.at) starts

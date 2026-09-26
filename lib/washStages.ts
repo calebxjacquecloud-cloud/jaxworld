@@ -45,46 +45,50 @@ export function stageAt(t: number): WashStage {
  * movement in the choreography, so each swipe shows one thing happening and
  * then pauses.
  */
-const KEY_STOPS: number[] = [
-  // arrive + product reveal
-  0, 0.04, 0.074, 0.095,
-  // see: scan geometry, then condition findings
-  0.13, 0.16, 0.184, 0.199,
-  // think: the cleaning plan
-  0.21, 0.221,
-  // move: arms leave their parking spots
-  0.237, 0.25,
-  // clean: rinse passes, then the tool head + foam
-  0.27, 0.298, 0.312, 0.338, 0.36, 0.388, 0.41, 0.43, 0.455,
-  // adapt + detail: side view, front wheel, rear wheel, zoom on FLAG 01, spot treatment, cleared
-  0.49, 0.525, 0.576, 0.627, 0.65, 0.66, 0.68, 0.697,
-  // spot-free finish
-  0.726, 0.744, 0.759, 0.774, 0.79,
-  // verify: arms home, recheck list resolves
-  0.826, 0.852, 0.884, 0.912,
-  // condition record
-  0.945, 0.975, 1,
-];
-
-/** Steps inside the "meet the machine" splices (intro progress u). */
-const INTRO_STOPS = [0.08, 0.16, 0.24, 0.32, 0.43, 0.52, 0.6, 0.68, 0.78, 0.9, 0.99];
-
 /**
- * Phone steps, on the combined scroll axis (prelude → main with splices → outro;
- * see mapProgress in hooks/useWashTimeline.ts). Main-timeline key stops get a
- * midpoint between each pair, so one swipe covers half the ground.
+ * Phone steps: one Next per beat. Each stop is a moment where that beat's
+ * panel is fully up (and, where there is one, the close-up window is open),
+ * so one tap plays the whole move and then pauses for reading.
  */
+const BEAT_STOPS = {
+  /** Main timeline (t). */
+  main: [
+    0.04, // Introducing the Carwash-O-Matic
+    0.16, // 01 See: see the vehicle before touching it
+    0.186, // condition findings on the car
+    0.21, // 02 Think: the cleaning plan
+    0.238, // 03 Move: the robots adapt around the car
+    0.32, // 04 Clean: follow the surface (rinse)
+    0.422, // 04 Clean: one robot, multiple treatments (tool head)
+    0.515, // 05 Adapt: driver-side close-up
+    0.61, // 06 Detail: wheels traced
+    0.688, // 06 Detail: automated detailing (FLAG 01)
+    0.76, // 06 Detail: spot-free finish
+    0.845, // 07 Verify
+    0.995, // condition record
+  ],
+  /** "Meet the machine" close-ups (intro progress u). */
+  intro: [
+    0.34, // the eyes
+    0.85, // the hands
+  ],
+  /** Outro (outro progress). */
+  outro: [
+    0.33, // what if a car wash wasn't a building?
+    0.86, // everything packs inside
+    1, // one system, one container, ready to move
+  ],
+};
+
+/** Phone steps, on the combined scroll axis (prelude → main with splices → outro; see mapProgress in hooks/useWashTimeline.ts). */
 export const SWIPE_STOPS: number[] = [
   // prelude (data/preludeSequence.ts): PRELUDE.length × prelude progress. One step per statement:
   // garage → (Start) out of the garage and round the first corner to "The problem" → each Next
   // takes the next corner and brings up the next statement.
   ...[0, 0.37, 0.54, 0.71, 0.88].map((u) => PRELUDE.length * u),
-  // main timeline
-  ...KEY_STOPS.flatMap((t, i) => (i === 0 ? [t] : [(KEY_STOPS[i - 1] + t) / 2, t])).map((t) => mainToScroll(t, PRELUDE.length)),
-  // meet the machine
-  ...INTRO_STOPS.map((u) => introToScroll(u, PRELUDE.length)),
-  // outro (data/outroSequence.ts), past the end of the main timeline
-  ...[0.1, 0.2, 0.31, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.91, 0.96, 1].map((u) => mainToScroll(1, PRELUDE.length) + OUTRO.length * u),
+  ...BEAT_STOPS.main.map((t) => mainToScroll(t, PRELUDE.length)),
+  ...BEAT_STOPS.intro.map((u) => introToScroll(u, PRELUDE.length)),
+  ...BEAT_STOPS.outro.map((u) => mainToScroll(1, PRELUDE.length) + OUTRO.length * u),
 ]
   .map((v) => +v.toFixed(4))
   .sort((x, y) => x - y)

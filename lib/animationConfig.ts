@@ -64,10 +64,10 @@ export const SCROLL = {
   /** Touch: one swipe = one step, played at a steady pace (see hooks/useStepProgress.ts). */
   step: {
     /** Playback speed between steps, in timeline progress per second. */
-    speed: 0.022,
+    speed: 0.026,
     /** Shortest and longest time a single step may take, in seconds. */
     minDuration: 1.1,
-    maxDuration: 4.2,
+    maxDuration: 6.5,
     /** Minimum finger travel (px) that counts as a swipe. */
     swipeThreshold: 28,
   },

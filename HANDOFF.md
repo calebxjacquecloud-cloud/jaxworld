@@ -89,7 +89,7 @@ each broken at least once:
 | `data/introSequence.ts` | "Meet the machine" close-ups (SEE eyes, MOVE hands) on one 0–1 timeline, played in two splices (`INTRO.splices` in lib/animationConfig.ts) while the main timeline holds; every device. Also the tool-head supply lines and the arm park position. |
 | `components/wash/IntroOverlay.tsx` / `ToolHead.ts` | Intro rings, leader, callouts and hose tags / the tool-head close-up model (own small scene, rendered in the detail window). |
 | `data/washSequence.ts` | The whole choreography as named channels (main view `v*`, detail camera `cam*` + `inset`, vehicle, two robot arms, spray, foam, scan effects) plus the 3D-anchored HTML annotations. `M(t0, t1, {...})` = camera/effect moves; `A()`/`B()` = arm waypoints. |
-| `lib/washStages.ts` | 12 chapters with 0–1 ranges, `SWIPE_STOPS` (69 phone steps: key stops plus midpoints), all scroll-timed copy. |
+| `lib/washStages.ts` | 12 chapters with 0–1 ranges, `SWIPE_STOPS` (phone steps: one per beat), all scroll-timed copy. |
 | `data/conditionReport.ts` | Condition-check story: visit 7 vs visit 6 record, five findings, recheck list, wear history. |
 | `lib/vehicleShape.ts` | Shape functions for the bubble-top car. Robot aim points are computed from these, so the paths follow the car's geometry. |
 | `components/wash/*.ts` | Imperative Three.js: `WashScene` (orchestrator; renders the main view, then the close-up into the detail window with a scissor rect), `Vehicle` (procedural car), `RobotArm` (closed-form IK), `SpraySystem`, `FoamLayer`, `ScanEffects`, `CameraArray`, `Bay`. |
@@ -118,6 +118,7 @@ geometry.
 
 ## Recent changes (latest first)
 
+- Phones: the wash is one Next per beat (`BEAT_STOPS` in lib/washStages.ts: 22 steps in all). Each tap plays the whole move and pauses with that beat's panel (and close-up window) up. Top-down view pulled back on portrait screens (`vPortraitK` 0.56) so the parked arms stay in frame. Step playback speed 0.026, max 6.5 s per step.
 - Phones: Start drives straight out of the garage to "The problem"; each Next takes one corner and shows the next statement (prelude stops `[0, 0.37, 0.54, 0.71, 0.88]` in `SWIPE_STOPS`). The fast lane (60-second / Skip) is desktop-only.
 - Phones only: on-screen step controls (`components/wash/StepControls.tsx`): Start on the garage screen, then ← Back / Next → with a step counter, Continue ↓ on the last step. Swipes still work. Bottom-anchored phone panels sit above the bar via `--ctl-h` on `.wash--stepped`; the garage door says "Press Start" on touch layouts.
 - Rebuilt to the revised narrative (see "What it is"). New: act indicator (`components/ActIndicator.tsx`, `lib/acts.ts`), fast lane (`components/wash/FastLane.tsx`), full-screen vehicle record (`components/wash/VehicleRecord.tsx`), final vision (`components/FinalVision.tsx`, livery in `lib/livery.ts`), collapsed reference (`components/HowItWorks.tsx`). SEE/MOVE close-ups now on phones; tool head moved into CLEAN. Header hidden until the garage opens. Nav/skip jumps cut straight to the target instead of scrubbing through. Placeholder emails still in `components/sections/CallToAction.tsx`.
