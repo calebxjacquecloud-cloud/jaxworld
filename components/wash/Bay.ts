@@ -128,6 +128,8 @@ function drawTurntable(): HTMLCanvasElement {
 export class Bay {
   readonly group = new THREE.Group();
   readonly turntable: THREE.Mesh;
+  /** Z rails of the XY stages, by pack id (rail-a-inner, rail-b-outer, …). */
+  readonly rails = new Map<string, THREE.Group>();
   readonly key: THREE.DirectionalLight;
   private rim: THREE.DirectionalLight;
   private envRT: THREE.WebGLRenderTarget;
@@ -172,17 +174,22 @@ export class Bay {
     // Z rails of both XY stages (flush floor tracks)
     const railLen = GANTRY.zMax - GANTRY.zMin + 1.4;
     const railGeo = new THREE.BoxGeometry(0.1, 0.04, railLen);
+    // each rail + its end stops is one group (origin on the floor at the rail centre) so it can be packed
     for (const side of [-1, 1]) {
       for (const x of [GANTRY.innerRailX, GANTRY.outerRailX]) {
+        const unit = new THREE.Group();
+        unit.position.set(side * x, 0, 0);
         const rail = new THREE.Mesh(railGeo, materials.rail);
-        rail.position.set(side * x, 0.02, 0);
+        rail.position.set(0, 0.02, 0);
         rail.receiveShadow = true;
-        this.group.add(rail);
+        unit.add(rail);
         for (const z of [GANTRY.zMin - 0.7, GANTRY.zMax + 0.7]) {
           const stop = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.1, 0.1), materials.accent);
-          stop.position.set(side * x, 0.05, z);
-          this.group.add(stop);
+          stop.position.set(0, 0.05, z);
+          unit.add(stop);
         }
+        this.group.add(unit);
+        this.rails.set(`rail-${side > 0 ? 'a' : 'b'}-${x === GANTRY.innerRailX ? 'inner' : 'outer'}`, unit);
       }
     }
 
@@ -197,10 +204,11 @@ export class Bay {
       this.key.castShadow = true;
       this.key.shadow.mapSize.set(2048, 2048);
       const sc = this.key.shadow.camera;
-      sc.left = -9;
-      sc.right = 9;
-      sc.top = 9;
-      sc.bottom = -9;
+      // wide enough to cover the utility row and the container pad in the outro
+      sc.left = -15;
+      sc.right = 15;
+      sc.top = 15;
+      sc.bottom = -15;
       sc.near = 1;
       sc.far = 40;
       this.key.shadow.bias = -0.0004;

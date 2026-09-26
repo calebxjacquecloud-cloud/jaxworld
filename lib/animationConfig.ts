@@ -12,11 +12,20 @@
  */
 export const INTRO = { at: 0.0995, length: 0.14 };
 
+/**
+ * "Pack it up" outro, appended after the main timeline on every device (see
+ * data/outroSequence.ts). `length` is extra scroll as a fraction of the main timeline.
+ */
+export const OUTRO = { length: 0.24 };
+
+/** 40 ft high-cube shipping container (metres, outside dimensions) and where it parks, below the bay. */
+export const CONTAINER = { length: 12.19, width: 2.44, height: 2.9, z: 10.2 };
+
 const BASE_WASH_VH = 3200;
 
 export const SCROLL = {
   /** Desktop: height of the pinned wash scene in viewport heights (scrolling scrubs the timeline + intro). */
-  washSectionVh: Math.round(BASE_WASH_VH * (1 + INTRO.length)),
+  washSectionVh: Math.round(BASE_WASH_VH * (1 + INTRO.length + OUTRO.length)),
   /** Desktop: GSAP scrub smoothing in seconds (higher = the scene eases after each wheel notch instead of jumping). */
   scrub: 1.4,
   /** Touch: one swipe = one step, played at a steady pace (see hooks/useStepProgress.ts). */

@@ -4,8 +4,9 @@ import { useEffect, useRef, type RefObject } from 'react';
 import { sampleAll, type ChannelValues } from '@/lib/timeline';
 import { discreteProgress } from '@/lib/washStages';
 import { WASH_TRACKS } from '@/data/washSequence';
-import { INTRO_ONLY_CHANNELS, INTRO_TRACKS, splitProgress } from '@/data/introSequence';
-import { INTRO } from '@/lib/animationConfig';
+import { INTRO_ONLY_CHANNELS, INTRO_TRACKS } from '@/data/introSequence';
+import { OUTRO_ONLY_CHANNELS, OUTRO_TRACKS } from '@/data/outroSequence';
+import { INTRO, OUTRO } from '@/lib/animationConfig';
 import type { WashScene } from '@/components/wash/WashScene';
 import type { ProgressRef } from './useScrollProgress';
 import { prefersReducedMotion } from './useReducedMotion';
@@ -17,6 +18,8 @@ export interface FrameContext {
   p: number;
   /** Intro progress: 0 before it, 1 after it (always 0 when the intro is off). */
   u: number;
+  /** Outro ("pack it up") progress: 0 until the wash ends, then 0→1. */
+  o: number;
   state: ChannelValues;
   scene: WashScene | null;
   time: number;
@@ -26,6 +29,46 @@ export type FrameFn = (ctx: FrameContext) => void;
 
 export interface FrameBus {
   add(fn: FrameFn): () => void;
+}
+
+/**
+ * Where the scroll is: main timeline `t`, desktop intro `u`, outro `o`.
+ *
+ * Desktop (scrub): progress 0–1 covers main + intro + outro, so it is
+ * stretched to that combined length and the intro spliced in at INTRO.at.
+ * Touch (stepped): progress already runs 0 → 1 + OUTRO.length (see SWIPE_STOPS).
+ * Reduced motion (desktop): each chapter snaps to its hold frame; the outro
+ * snaps to its final frame.
+ */
+function mapProgress(v: number, stepped: boolean, intro: boolean, discrete: boolean, out: { t: number; u: number; o: number }) {
+  const L = OUTRO.length;
+  let E: number;
+  out.u = 0;
+  if (stepped) E = v;
+  else {
+    const D = intro ? INTRO.length : 0;
+    E = v * (1 + D + L);
+    if (intro) {
+      if (E >= INTRO.at && E < INTRO.at + D) {
+        out.t = INTRO.at;
+        out.u = (E - INTRO.at) / D;
+        out.o = 0;
+        return out;
+      }
+      if (E >= INTRO.at + D) {
+        E -= D;
+        out.u = 1;
+      }
+    }
+  }
+  if (E <= 1) {
+    out.t = discrete ? discreteProgress(Math.max(0, E)) : Math.max(0, E);
+    out.o = 0;
+  } else {
+    out.t = 1;
+    out.o = discrete ? 1 : Math.min(1, (E - 1) / L);
+  }
+  return out;
 }
 
 /** Channels that animate on their own (spray, pulsing markers, scan sweep) even when progress is still. */
@@ -58,8 +101,8 @@ export function useWashTimeline(
     const el = sectionRef.current;
     if (!el) return;
     const state: ChannelValues = {};
-    const ctx: FrameContext = { t: 0, p: 0, u: 0, state, scene: null, time: 0 };
-    const split = { t: 0, u: 0 };
+    const ctx: FrameContext = { t: 0, p: 0, u: 0, o: 0, state, scene: null, time: 0 };
+    const split = { t: 0, u: 0, o: 0 };
     const start = performance.now();
     const reduced = prefersReducedMotion();
     let visible = true;
@@ -78,7 +121,8 @@ export function useWashTimeline(
       if (!visible) return;
       raf = requestAnimationFrame(frame);
 
-      const p = reduced && !progress.stepped ? discreteProgress(progress.raw) : progress.value;
+      const discrete = reduced && !progress.stepped;
+      const p = discrete ? progress.raw : progress.value;
       const scene = sceneRef.current;
       const moved = Math.abs(p - lastP) > 1e-6;
       const sceneChanged = scene !== lastScene;
@@ -87,17 +131,16 @@ export function useWashTimeline(
       lastP = p;
       lastScene = scene;
 
-      if (intro) splitProgress(p, INTRO.at, INTRO.length, split);
-      else {
-        split.t = p;
-        split.u = 0;
-      }
+      mapProgress(p, !!progress.stepped, intro, discrete, split);
       sampleAll(WASH_TRACKS, split.t, state);
       if (split.u > 0 && split.u < 1) sampleAll(INTRO_TRACKS, split.u, state);
       else for (const k of INTRO_ONLY_CHANNELS) state[k] = 0;
+      if (split.o > 0) sampleAll(OUTRO_TRACKS, split.o, state);
+      else for (const k of OUTRO_ONLY_CHANNELS) state[k] = 0;
       ctx.t = split.t;
-      ctx.p = p;
+      ctx.p = progress.stepped ? p / (1 + OUTRO.length) : p;
       ctx.u = split.u;
+      ctx.o = split.o;
       ctx.time = (now - start) / 1000;
       ctx.scene = scene;
       if (scene) {

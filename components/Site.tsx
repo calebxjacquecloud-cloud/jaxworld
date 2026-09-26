@@ -4,7 +4,6 @@ import Header from './Header';
 import WashExperience from './WashExperience';
 import WashRecap from './sections/WashRecap';
 import MotionAnalogy from './sections/MotionAnalogy';
-import ModularSystem from './ModularSystem';
 import DeploymentVisual from './sections/DeploymentVisual';
 import PhysicalAI from './PhysicalAI';
 import AutonomousFuture from './AutonomousFuture';
@@ -25,7 +24,6 @@ export default function Site() {
         <div id="after-demo" />
         <WashRecap />
         <MotionAnalogy />
-        <ModularSystem />
         <DeploymentVisual />
         <PhysicalAI />
         <AutonomousFuture />

@@ -18,7 +18,7 @@ project without re-deriving decisions or breaking things that were fixed.
 Investor/demo site for an early-stage autonomous, touchless, robotic car-wash
 concept. The heart of the page is a pinned 3D wash demo driven by scroll
 (desktop) or swipes (phone). Below it are supporting sections: how it works,
-3D-printer motion analogy, shipping-container packing and deployment, physical
+3D-printer motion analogy, deployment, physical
 AI thesis, autonomous fleets, interior cleaning (future phase), operations
 dashboard mock, call to action, footer disclaimer.
 
@@ -66,6 +66,8 @@ each broken at least once:
 | `hooks/useScrollProgress.ts` | Desktop: GSAP ScrollTrigger scrub → progress 0–1 in a ref. |
 | `hooks/useStepProgress.ts` | Touch: one swipe (or wheel notch / arrow key) = one step; GSAP tweens progress to the next stop at a steady pace. Engages when the page is scrolled no further than the demo's top edge. |
 | `hooks/useWashTimeline.ts` | The only animation loop: samples all channels at the current progress, poses the 3D scene, updates overlays. Skips frames when nothing moves. |
+| `data/outroSequence.ts` | "Pack it up" outro on its own 0–1 track after the main timeline (every device): car drives out, hidden utilities rise, container slides in, `PACK_PLAN` loads every unit into its slot, roof + wall close, livery shot. Also the outro copy and equipment labels. |
+| `components/wash/Utilities.ts` / `ShippingContainer.ts` / `OutroOverlay.tsx` | Utility-row equipment models / the 40 ft container with folding wall and canvas-drawn livery / outro equipment labels. |
 | `data/introSequence.ts` | Desktop-only "meet the bay" intro on its own 0–1 timeline, spliced in at `INTRO.at` (lib/animationConfig.ts) while the main timeline holds. Also the tool-head supply lines and the arm park position. |
 | `components/wash/IntroOverlay.tsx` / `ToolHead.ts` | Intro rings, leader, callouts and hose tags / the tool-head close-up model (own small scene, rendered in the detail window). |
 | `data/washSequence.ts` | The whole choreography as named channels (main view `v*`, detail camera `cam*` + `inset`, vehicle, two robot arms, spray, foam, scan effects) plus the 3D-anchored HTML annotations. `M(t0, t1, {...})` = camera/effect moves; `A()`/`B()` = arm waypoints. |
@@ -98,6 +100,7 @@ geometry.
 
 ## Recent changes (latest first)
 
+- 3D "pack it up" ending after the finale (desktop and phones): car drives out; water storage, pressurization skid, 4 chemistry tubs, control/compute + network cabinets and hose reels rise from a utility row; a 40 ft container slides in; rails, stage bridges, utilities, 8 pylons and both arms pack in one by one; roof lowers, long wall folds up to show the Jax World Carwash-O-Matic livery. Replaced the old illustrated "Modular" section (removed); the Modular nav link jumps into the ending (desktop anchor inside the wash section, phones jump to that step). Scroll mapping lives in `hooks/useWashTimeline.ts` (`mapProgress`).
 - Desktop intro after the pylons rise: green rings draw around the 8 cameras → lower-left close-up of one camera + "eyes of the AI" callout; rings move to the 2 arms → whole-arm close-up; window wipes to a new tool-head model (1 nozzle, 5 supply lines: high-pressure water, body wash, tire clean & shine, hot wax, spot-free) with numbered tags and a list that lights up line by line. Arms now park at ±5.7 m so both are in frame. Phones and reduced motion skip the intro (not built for mobile yet).
 - Two-camera layout: the main view climbs to a high top-down shot during arrival (car + all eight camera pylons + arm stages in frame) and never moves after that. Close-ups (driver side, front wheel, rear wheel, Flag 01, finish) play in a detail window in the upper right (`components/wash/DetailWindow.tsx` draws its frame and caption). Copy for scenes 06–08 moved to the left so it doesn't collide with the window. On phones the window stays closed for the finish, where the checklist sits.
 - Removed the phase title box and the rail's chapter labels; the desktop rail is a line only.

@@ -170,9 +170,22 @@ export class RobotArm {
     });
   }
 
+  /** Move the whole posed arm (carriage, joints, tool) by an offset, after update(). Used for packing. */
+  shift(dx: number, dy: number, dz: number) {
+    this.carriage.position.x += dx;
+    this.carriage.position.y += dy;
+    this.carriage.position.z += dz;
+    this.tool.position.x += dx;
+    this.tool.position.y += dy;
+    this.tool.position.z += dz;
+    this.nozzle.x += dx;
+    this.nozzle.y += dy;
+    this.nozzle.z += dz;
+  }
+
   /** Solve IK and pose every joint for this frame. */
   update(bx: number, bz: number, aim: THREE.Vector3, off: THREE.Vector3, mode: number) {
-    this.bridge.position.z = bz;
+    this.bridge.position.set(0, 0, bz);
     this.carriage.position.set(bx, 0, bz);
     this.aim.copy(aim);
 

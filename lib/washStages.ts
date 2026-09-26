@@ -1,3 +1,5 @@
+import { OUTRO } from './animationConfig';
+
 /**
  * The twelve chapters of the wash demo on the normalized 0–1 scroll timeline.
  * `hold` is the representative moment shown to reduced-motion visitors, who
@@ -59,9 +61,11 @@ const KEY_STOPS: number[] = [
 ];
 
 /** Phone steps: every key stop plus a midpoint between each pair, so one swipe covers half the ground. */
-export const SWIPE_STOPS: number[] = KEY_STOPS.flatMap((t, i) =>
-  i === 0 ? [t] : [+((KEY_STOPS[i - 1] + t) / 2).toFixed(4), t],
-);
+export const SWIPE_STOPS: number[] = [
+  ...KEY_STOPS.flatMap((t, i) => (i === 0 ? [t] : [+((KEY_STOPS[i - 1] + t) / 2).toFixed(4), t])),
+  // outro (data/outroSequence.ts), past the end of the main timeline: 1 + OUTRO.length × outro progress
+  ...[0.1, 0.2, 0.31, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.91, 0.96, 1].map((u) => +(1 + OUTRO.length * u).toFixed(4)),
+];
 
 /** Reduced-motion mapping: snap continuous progress to the current chapter's hold frame. */
 export function discreteProgress(t: number): number {

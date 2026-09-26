@@ -37,10 +37,15 @@ const corners = (() => {
 })();
 
 const tmp = new THREE.Vector3();
+const tmpH = new THREE.Vector3();
 
 export class CameraArray {
   readonly group = new THREE.Group();
-  private pylons: { mast: THREE.Mesh; head: THREE.Group; lens: THREE.MeshStandardMaterial; pos: THREE.Vector2 }[] = [];
+  /** One group per pylon (base, mast, head), origin on the floor at the pylon, so it can be packed as a unit. */
+  readonly units: THREE.Group[] = [];
+  private pylons: { unit: THREE.Group; mast: THREE.Mesh; head: THREE.Group; lens: THREE.MeshStandardMaterial; pos: THREE.Vector2 }[] = [];
+  /** Pylons being packed stop aiming at the bay. */
+  private free: boolean[] = [];
   private beams: THREE.LineSegments;
   private beamMat = new THREE.LineBasicMaterial({ color: SCENE_COLORS.cyan, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
 
@@ -53,17 +58,20 @@ export class CameraArray {
     const finGeo = new THREE.BoxGeometry(0.02, 0.2, 0.26);
 
     for (const p of pylonPositions()) {
+      const unit = new THREE.Group();
+      unit.position.set(p.x, 0, p.y);
+      this.group.add(unit);
       const base = new THREE.Mesh(baseGeo, materials.joint);
-      base.position.set(p.x, 0.025, p.y);
+      base.position.set(0, 0.025, 0);
       base.receiveShadow = true;
-      this.group.add(base);
+      unit.add(base);
       const mast = new THREE.Mesh(mastGeo, materials.chrome);
-      mast.position.set(p.x, 0.04, p.y);
+      mast.position.set(0, 0.04, 0);
       mast.castShadow = true;
-      this.group.add(mast);
+      unit.add(mast);
 
       const head = new THREE.Group();
-      head.position.set(p.x, 0.2, p.y);
+      head.position.set(0, 0.2, 0);
       const pod = new THREE.Mesh(podGeo, materials.paint);
       pod.castShadow = true;
       head.add(pod);
@@ -77,8 +85,10 @@ export class CameraArray {
       const fin = new THREE.Mesh(finGeo, materials.chrome);
       fin.position.set(0, 0.17, -0.12);
       head.add(fin);
-      this.group.add(head);
-      this.pylons.push({ mast, head, lens: lensMat, pos: p });
+      unit.add(head);
+      this.units.push(unit);
+      this.free.push(false);
+      this.pylons.push({ unit, mast, head, lens: lensMat, pos: p });
     }
 
     const g = new THREE.BufferGeometry();
@@ -90,7 +100,12 @@ export class CameraArray {
 
   /** World position of pylon i's camera head. */
   headPosition(i: number, out: THREE.Vector3): THREE.Vector3 {
-    return out.copy(this.pylons[i].head.position);
+    return this.pylons[i].head.getWorldPosition(out);
+  }
+
+  /** Mark pylon i as being packed (it stops aiming at the bay and faces along its unit). */
+  setFree(i: number, free: boolean) {
+    this.free[i] = free;
   }
 
   get count() {
@@ -108,12 +123,17 @@ export class CameraArray {
       // Heads sit in floor pockets until the pylons rise.
       p.head.visible = rise > 0.01;
       p.head.position.y = -0.25 + Math.min(1, rise * 6) * 0.45 + h;
-      p.head.lookAt(0, 0.6, 0);
+      if (this.free[i]) p.head.rotation.set(0, 0, 0);
+      else {
+        p.unit.updateMatrixWorld();
+        p.head.lookAt(0, 0.6, 0);
+      }
       // staggered power-up around the ring
       const stagger = THREE.MathUtils.clamp(active * (n + 2) - i, 0, 1);
       p.lens.emissiveIntensity = stagger * (1.6 + 0.5 * Math.sin(time * 5 + i));
+      p.head.getWorldPosition(tmpH);
       for (const c of corners) {
-        pos.setXYZ(k++, p.head.position.x, p.head.position.y, p.head.position.z);
+        pos.setXYZ(k++, tmpH.x, tmpH.y, tmpH.z);
         tmp.copy(c).applyMatrix4(vehicleRoot.matrixWorld);
         pos.setXYZ(k++, tmp.x, tmp.y, tmp.z);
       }

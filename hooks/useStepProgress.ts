@@ -18,7 +18,13 @@ import { prefersReducedMotion } from './useReducedMotion';
  * The visitor never fights momentum or a snap: the page doesn't scroll while
  * stepping, and the animation is time-based, not position-based.
  */
-export function useStepProgress(sectionRef: RefObject<HTMLElement>, stops: number[], enabled: boolean): ProgressRef {
+export function useStepProgress(
+  sectionRef: RefObject<HTMLElement>,
+  stops: number[],
+  enabled: boolean,
+  /** In-page links (e.g. "#modular") that should jump straight to a step. */
+  jumps: Record<string, number> = {},
+): ProgressRef {
   const progress = useRef<ProgressRef>({ value: 0, raw: 0, stepped: true });
 
   useEffect(() => {
@@ -110,6 +116,17 @@ export function useStepProgress(sectionRef: RefObject<HTMLElement>, stops: numbe
       step(d);
     };
 
+    // ── in-page links into the demo (header / footer nav) ──
+    const onLink = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.('a[href^="#"]');
+      const idx = a ? jumps[a.getAttribute('href') ?? ''] : undefined;
+      if (idx === undefined || idx < 0) return;
+      e.preventDefault();
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+      goTo(idx);
+    };
+    document.addEventListener('click', onLink);
+
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
@@ -122,8 +139,9 @@ export function useStepProgress(sectionRef: RefObject<HTMLElement>, stops: numbe
       el.removeEventListener('touchend', onTouchEnd);
       el.removeEventListener('wheel', onWheel);
       window.removeEventListener('keydown', onKey);
+      document.removeEventListener('click', onLink);
     };
-  }, [sectionRef, stops, enabled]);
+  }, [sectionRef, stops, enabled, jumps]);
 
   return progress.current;
 }

@@ -3,6 +3,10 @@
 import { useEffect, useRef } from 'react';
 import type { FrameBus } from '@/hooks/useWashTimeline';
 import { WASH_COPY } from '@/lib/washStages';
+import { OUTRO_COPY } from '@/data/outroSequence';
+import { OUTRO } from '@/lib/animationConfig';
+
+const BLOCKS = [...WASH_COPY.map((c) => ({ c, outro: false })), ...OUTRO_COPY.map((c) => ({ c, outro: true }))];
 import { windowed } from '@/lib/timeline';
 import { setFade } from '@/lib/domWrite';
 
@@ -12,12 +16,15 @@ export default function WashCopy({ bus }: { bus: FrameBus }) {
 
   useEffect(
     () =>
-      bus.add(({ t }) => {
-        WASH_COPY.forEach((c, i) => {
+      bus.add(({ t, o: outro }) => {
+        BLOCKS.forEach(({ c, outro: isOutro }, i) => {
           const el = refs.current[i];
           if (!el) return;
-          const o = windowed(t, c.in, c.out, 0.009);
-          const drift = ((c.in + c.out) / 2 - t) * 260;
+          // outro copy is timed on its own 0–1 track, which spans OUTRO.length of the main timeline
+          const x = isOutro ? outro : t;
+          const k = isOutro ? OUTRO.length : 1;
+          const o = isOutro && outro <= 0 ? 0 : windowed(x, c.in, c.out, 0.009 / k);
+          const drift = ((c.in + c.out) / 2 - x) * 260 * k;
           setFade(el, o, `translate3d(0, ${drift.toFixed(1)}px, 0)`);
         });
       }),
@@ -26,7 +33,7 @@ export default function WashCopy({ bus }: { bus: FrameBus }) {
 
   return (
     <div className="wash-copy">
-      {WASH_COPY.map((c, i) => (
+      {BLOCKS.map(({ c }, i) => (
         <div
           key={c.id}
           ref={(el) => {

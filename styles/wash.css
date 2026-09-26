@@ -11,6 +11,16 @@
   /* vertical swipes only; no sideways panning inside the demo */
   touch-action: pan-y;
 }
+.wash__anchor {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  top: calc(var(--anchor-p, 0) * (100% - 100vh));
+}
+.wash--stepped .wash__anchor {
+  top: 0;
+}
 .wash--stepped .wash__pin {
   height: 100%;
 }
@@ -128,6 +138,13 @@
   backdrop-filter: var(--panel-blur);
   -webkit-backdrop-filter: var(--panel-blur);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+.wash-copy__block--bottom {
+  left: var(--gutter);
+  top: auto;
+  margin-top: 0;
+  bottom: clamp(36px, 6vh, 64px);
+  width: min(40rem, 52vw);
 }
 .wash-copy__block--left {
   left: var(--gutter);
@@ -358,6 +375,14 @@
   opacity: 0;
   box-shadow: 0 0 0 2px rgba(17, 19, 22, 0.7);
   will-change: transform, opacity;
+}
+
+.anno--below .anno__leader {
+  display: none;
+}
+.anno--below .anno__card {
+  top: 14px;
+  left: 12px;
 }
 
 /* callouts inside the detail window open to the left so they stay within it */

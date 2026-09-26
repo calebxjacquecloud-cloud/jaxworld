@@ -34,7 +34,7 @@ pointing at the value Vercel shows under Project → Settings → Domains.
 | `hooks/useStepProgress.ts` | Touch: one swipe = one step; the timeline tweens to the next stop and stops (`SWIPE_STOPS` in `lib/washStages.ts`) |
 | `hooks/useWashTimeline.ts` | The single rAF loop: sample channels → pose 3D scene → update overlays; idles when nothing moves |
 | `components/wash/*` | Imperative Three.js pieces: `WashScene`, `Vehicle`, `RobotArm` (closed-form IK), `SpraySystem`, `FoamLayer`, `ScanEffects`, `CameraArray`, `Bay`; plus the React overlays |
-| `components/*.tsx`, `components/sections/*` | Supporting sections (motion analogy, modular container, deployment, physical AI, autonomous future, interior phase, ops platform, CTA) |
+| `components/*.tsx`, `components/sections/*` | Supporting sections (motion analogy, deployment, physical AI, autonomous future, interior phase, ops platform, CTA) |
 
 Tuning pacing: edit the `M(t0, t1, {...})` camera/effect moves and the `A()/B()`
 arm waypoints in `data/washSequence.ts`. Stage boundaries live in `lib/washStages.ts`.

@@ -21,7 +21,9 @@ export default function InspectionOverlay({ bus }: { bus: FrameBus }) {
 
   useEffect(
     () =>
-      bus.add(({ t, state }) => {
+      bus.add(({ t, o: outro, state }) => {
+        // the finale clears as the outro (car drives out) begins
+        const keep = 1 - clamp01(outro / 0.04);
         const ro = windowed(t, 0.868, 0.926, 0.008);
         setFade(record.current, ro);
         if (ro > 0) {
@@ -29,11 +31,11 @@ export default function InspectionOverlay({ bus }: { bus: FrameBus }) {
           FINDINGS.forEach((f, i) => resolved.current[i]?.classList.toggle('is-on', t >= f.tResolved));
         }
         const co = clamp01((t - 0.93) / 0.01);
-        setFade(checklist.current, co);
+        setFade(checklist.current, co * keep);
         if (co > 0) checks.current.forEach((li, i) => li?.classList.toggle('is-on', t > 0.936 + i * 0.006));
         {
           const o = clamp01((t - 0.962) / 0.014);
-          setFade(finale.current, o, `translate3d(0, ${((1 - o) * 24).toFixed(1)}px, 0)`);
+          setFade(finale.current, o * keep, `translate3d(0, ${((1 - o) * 24).toFixed(1)}px, 0)`);
         }
       }),
     [bus],

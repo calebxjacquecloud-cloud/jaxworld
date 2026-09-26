@@ -109,22 +109,3 @@ M(0.92, 0.97, { inset: 0, call3: 0, linkArm: 0, ringArmOut: 1, camActive: 0 });
 M(0.975, 0.976, { toolView: 0 });
 
 export const INTRO_TRACKS = tb.build();
-
-/**
- * Map desktop scroll progress (0–1 over the whole section) to the main
- * timeline position `t` and intro progress `u` (0 before, 1 after).
- */
-export function splitProgress(p: number, at: number, length: number, out: { t: number; u: number }) {
-  const P = p * (1 + length);
-  if (P < at) {
-    out.t = P;
-    out.u = 0;
-  } else if (P < at + length) {
-    out.t = at;
-    out.u = (P - at) / length;
-  } else {
-    out.t = Math.min(1, P - length);
-    out.u = 1;
-  }
-  return out;
-}

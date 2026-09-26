@@ -16,11 +16,16 @@ import { RobotArm, createArmMaterials } from './RobotArm';
 import { Spray } from './SpraySystem';
 import { FoamLayer } from './FoamLayer';
 import { ScanEffects } from './ScanEffects';
-import { CameraArray } from './CameraArray';
+import { CameraArray, pylonPositions } from './CameraArray';
 import { Bay } from './Bay';
 import { ToolHeadScene } from './ToolHead';
+import { Utilities } from './Utilities';
+import { ShippingContainer } from './ShippingContainer';
+import { PACK_PLAN, unitProgress } from '@/data/outroSequence';
+import { CONTAINER, GANTRY } from '@/lib/animationConfig';
 
 const DEG = Math.PI / 180;
+const pylonHome = pylonPositions();
 const REF_ASPECT = 16 / 9;
 
 export interface ScreenPoint {
@@ -65,6 +70,11 @@ export class WashScene {
   private toolView = false;
   private toolStep = 0;
   private tool: ToolHeadScene;
+  private utilities: Utilities;
+  private container: ShippingContainer;
+  /** Pack-plan index by unit id. */
+  private packIndex = new Map<string, number>();
+  private tmpP = new THREE.Vector3();
   readonly quality: 'high' | 'medium' | 'low';
   private vehicle: VehicleRig;
   private carRoot = new THREE.Group();
@@ -113,6 +123,11 @@ export class WashScene {
 
     this.pylons = new CameraArray(armMats);
     this.tool = new ToolHeadScene(this.scene.environment, armMats);
+    this.utilities = new Utilities(armMats);
+    this.scene.add(this.utilities.group);
+    this.container = new ShippingContainer(armMats.chrome);
+    this.scene.add(this.container.group);
+    PACK_PLAN.forEach((slot, i) => this.packIndex.set(slot.id, i));
     this.scene.add(this.pylons.group);
 
     this.arms = [new RobotArm(1, armMats, 'A'), new RobotArm(-1, armMats, 'B')];
@@ -177,10 +192,13 @@ export class WashScene {
 
     // ── vehicle ──
     arrivalPose(s.drive, this.pose);
-    this.carRoot.position.set(this.pose.x, 0, this.pose.z);
+    // outro: the finished car drives straight out of the bay along +z
+    this.carRoot.position.set(this.pose.x, 0, this.pose.z + s.exitZ);
     this.carRoot.rotation.y = this.pose.yaw + s.carYaw * DEG;
+    this.carRoot.visible = s.exitZ < 28;
+    const exitRoll = s.exitZ / VEHICLE.wheelRadius;
     for (const w of this.vehicle.wheels) {
-      w.spin.rotation.x = this.pose.roll;
+      w.spin.rotation.x = this.pose.roll + exitRoll;
       if (w.front) w.steer.rotation.y = this.pose.steer;
     }
     this.bay.turntable.rotation.y = s.drive >= 1 ? s.carYaw * DEG : 0;
@@ -193,6 +211,27 @@ export class WashScene {
     const S = VEHICLE.smudge;
     this.hole.set(S.x, S.y, S.z, s.holeR);
     this.foam.update(s.foam, s.drain, this.hole, this.carRoot);
+
+    // ── outro: container, utilities, tracks and pylons (arms follow their IK below) ──
+    const cx = (1 - s.contIn) * 30;
+    this.container.update(s.contIn > 0.001, cx, CONTAINER.z, s.roof, s.wall);
+    const utilOn = this.utilities.rise(s.util, s.pack);
+    const riseY = Utilities.riseY(s.util);
+    for (const [id, g] of this.utilities.units) {
+      if (!utilOn) continue;
+      const home = this.utilities.home.get(id)!;
+      this.packUnit(g, id, s.pack, cx, home.x, riseY, home.z, 0);
+    }
+    for (const [id, g] of this.bay.rails) {
+      const side = id.startsWith('rail-a') ? 1 : -1;
+      const x = side * (id.endsWith('inner') ? GANTRY.innerRailX : GANTRY.outerRailX);
+      this.packUnit(g, id, s.pack, cx, x, 0, 0, 0);
+    }
+    this.pylons.units.forEach((g, i) => {
+      const home = pylonHome[i];
+      const moved = this.packUnit(g, `pylon-${i}`, s.pack, cx, home.x, 0, home.y, 0);
+      this.pylons.setFree(i, moved);
+    });
 
     // ── computer vision ──
     this.pylons.update(s.camRise, s.camActive, s.beams, this.carRoot, time);
@@ -219,6 +258,23 @@ export class WashScene {
       this.tmpO.set(s[id + 'Ox'], s[id + 'Oy'], s[id + 'Oz']);
       const arm = this.arms[i];
       arm.update(s[id + 'Bx'], s[id + 'Bz'], this.tmpA, this.tmpO, s[id + 'Mode']);
+      // outro: the posed arm and its stage bridge each travel into the container
+      if (s.pack > 0) {
+        const bx = s[id + 'Bx'];
+        const bz = s[id + 'Bz'];
+        const k = unitProgress(s.pack, this.packIndex.get(`arm-${id}`)!);
+        if (k > 0) {
+          this.packPath(`arm-${id}`, k, cx, bx, 0, bz, 0);
+          arm.shift(this.tmpP.x - bx, this.tmpP.y, this.tmpP.z - bz);
+        }
+        const side = id === 'a' ? 1 : -1;
+        const mid = side * (GANTRY.innerRailX + GANTRY.outerRailX) / 2;
+        const kb = unitProgress(s.pack, this.packIndex.get(`bridge-${id}`)!);
+        if (kb > 0) {
+          this.packPath(`bridge-${id}`, kb, cx, mid, 0, bz, 0);
+          arm.bridge.position.set(this.tmpP.x - mid, this.tmpP.y, this.tmpP.z);
+        }
+      }
       this.sprays[i].update(arm.nozzle, arm.aim, s[id + 'Spray'], s[id + 'Mode'], time);
     });
 
@@ -270,6 +326,34 @@ export class WashScene {
     }
   }
 
+  /**
+   * Position along a unit's packing path: lift, travel and settle into its
+   * container slot, written to tmpP. Returns the rotation (radians) at that point.
+   */
+  private packPath(id: string, k: number, cx: number, x0: number, y0: number, z0: number, rot0: number): number {
+    const slot = PACK_PLAN[this.packIndex.get(id)!];
+    const e = k * k * (3 - 2 * k);
+    const tx = cx + slot.x;
+    const ty = slot.y ?? 0;
+    const tz = CONTAINER.z + slot.z;
+    const lift = id.startsWith('rail') || id.startsWith('bridge') ? 2.2 : 3.4;
+    this.tmpP.set(x0 + (tx - x0) * e, y0 + (ty - y0) * e + Math.sin(Math.PI * k) * lift, z0 + (tz - z0) * e);
+    return rot0 + ((slot.rotY ?? 0) * DEG - rot0) * e;
+  }
+
+  /** Place a packable unit for packing progress `pack`; returns true once it has left its home. */
+  private packUnit(obj: THREE.Object3D, id: string, pack: number, cx: number, x0: number, y0: number, z0: number, rot0: number): boolean {
+    const k = unitProgress(pack, this.packIndex.get(id)!);
+    if (k <= 0) {
+      obj.position.set(x0, y0, z0);
+      obj.rotation.y = rot0;
+      return false;
+    }
+    obj.rotation.y = this.packPath(id, k, cx, x0, y0, z0, rot0);
+    obj.position.copy(this.tmpP);
+    return true;
+  }
+
   consumeDirty(): boolean {
     const d = this.dirty;
     this.dirty = false;
@@ -313,6 +397,11 @@ export class WashScene {
     out.x = (v.x * 0.5 + 0.5) * this.width;
     out.y = (-v.y * 0.5 + 0.5) * this.height;
     return out;
+  }
+
+  /** A world point, in the main view. */
+  projectPoint(x: number, y: number, z: number, out: ScreenPoint): ScreenPoint {
+    return this.projectWorld(this.project.set(x, y, z), out);
   }
 
   /** Camera head of pylon i, in the main view. */
@@ -359,6 +448,7 @@ export class WashScene {
     this.disposed = true;
     this.vehicle.dispose();
     this.tool.dispose();
+    this.container.dispose();
     this.bay.dispose();
     this.scene.traverse((o) => {
       const m = o as THREE.Mesh;
