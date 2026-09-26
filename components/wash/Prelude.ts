@@ -11,7 +11,7 @@
 
 import * as THREE from 'three';
 import { CORNERS, GARAGE, routePoints } from '@/lib/roadPath';
-import { SCENE_COLORS } from '@/lib/animationConfig';
+import { SCENE_COLORS, isTouchLayout } from '@/lib/animationConfig';
 import jacque from '@/assets/jacque-sticker.png';
 
 const ROAD_W = 4.6;
@@ -182,8 +182,10 @@ function drawDoor(c: HTMLCanvasElement, mascot: HTMLImageElement | null) {
   g.fillStyle = RUST;
   g.fillText('OUTDATED.', x, h * 0.66);
   g.fillStyle = INK;
-  fit(g, 'SCROLL TO OPEN  ↓', col, h * 0.038, (px) => `500 ${px}px "IBM Plex Mono", monospace`);
-  g.fillText('SCROLL TO OPEN  ↓', x, h * 0.8);
+  // phones drive the demo with on-screen buttons (StepControls)
+  const prompt = isTouchLayout() ? 'PRESS START  ↓' : 'SCROLL TO OPEN  ↓';
+  fit(g, prompt, col, h * 0.038, (px) => `500 ${px}px "IBM Plex Mono", monospace`);
+  g.fillText(prompt, x, h * 0.8);
 }
 
 function drawSign(c: HTMLCanvasElement) {

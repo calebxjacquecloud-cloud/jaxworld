@@ -14,6 +14,10 @@ export interface ProgressRef {
   raw: number;
   /** True for stepped touch playback, which handles reduced motion itself. */
   stepped?: boolean;
+  /** Stepped only: current step, number of steps, and a way to move one step (for the on-screen buttons). */
+  index?: number;
+  count?: number;
+  go?: (dir: 1 | -1) => void;
 }
 
 /**

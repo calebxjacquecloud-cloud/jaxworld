@@ -51,6 +51,7 @@ export function useStepProgress(
 
     const goTo = (i: number, instant = false) => {
       index = Math.max(0, Math.min(last, i));
+      proxy.index = index;
       const target = stops[index];
       const dist = Math.abs(target - proxy.value);
       tween?.kill();
@@ -66,6 +67,9 @@ export function useStepProgress(
       });
     };
     const step = (dir: 1 | -1) => goTo(index + dir);
+    proxy.index = index;
+    proxy.count = stops.length;
+    proxy.go = step;
 
     // ── touch ──
     let y0 = 0;
@@ -138,6 +142,7 @@ export function useStepProgress(
     el.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('keydown', onKey);
     return () => {
+      proxy.go = undefined;
       tween?.kill();
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);

@@ -6,6 +6,8 @@
 }
 /* touch: one screen, played step by step (hooks/useStepProgress.ts) */
 .wash--stepped {
+  /* room for the phone step controls (StepControls) under the copy panels */
+  --ctl-h: 60px;
   height: 100vh;
   height: var(--stepped-h, 100svh);
   /* vertical swipes only; no sideways panning inside the demo */
@@ -422,7 +424,7 @@
 .fastlane {
   position: absolute;
   left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(24px, 6vh, 56px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(24px, 6vh, 56px) + var(--ctl-h, 0px));
   transform: translateX(-50%);
   z-index: 5;
   display: flex;
@@ -659,7 +661,7 @@
   .vrec {
     right: var(--gutter);
     top: calc(var(--header-bottom) + 40px);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px + var(--ctl-h, 0px));
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     gap: 12px;
@@ -800,7 +802,7 @@
     left: var(--gutter);
     right: var(--gutter);
     width: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
     padding: 12px 14px 12px;
     gap: 6px;
   }
@@ -833,7 +835,7 @@
     left: var(--gutter);
     right: var(--gutter);
     width: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
     padding: 14px 16px 16px;
     gap: 8px;
   }
@@ -1087,7 +1089,7 @@
     width: auto;
     top: auto;
     margin-top: 0;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
     gap: 8px;
   }
   .wash-copy__block,
@@ -1122,7 +1124,7 @@
     right: var(--gutter);
     width: auto;
     top: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
     transform: none;
   }
   .checklist {
@@ -1141,7 +1143,7 @@
   .finale {
     max-width: none;
     right: var(--gutter);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
   }
   .detail__label {
     left: auto;
@@ -1394,7 +1396,7 @@
     right: var(--gutter);
     width: auto;
     top: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px + var(--ctl-h, 0px));
     transform: none;
     padding: 12px 12px 10px;
     gap: 6px;
@@ -1442,4 +1444,67 @@
   .rail {
     display: none;
   }
+}
+
+/* ── phone step controls (components/wash/StepControls.tsx) ── */
+.stepctl {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stepctl button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  height: 46px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.stepctl__back {
+  width: 46px;
+  flex: none;
+  border: 1px solid rgba(236, 229, 216, 0.3);
+  background: var(--panel-bg);
+  color: var(--ink-text);
+  font-size: 1.2rem;
+}
+.stepctl__back:disabled {
+  opacity: 0.3;
+}
+.stepctl__count {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+.stepctl__next {
+  flex: none;
+  min-width: 132px;
+  padding: 0 22px;
+  border: 0;
+  background: var(--orange);
+  color: #1a0e07;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+.stepctl__next:active,
+.stepctl__back:active {
+  transform: scale(0.96);
+}
+.stepctl.is-start {
+  justify-content: center;
+}
+.stepctl.is-start .stepctl__back,
+.stepctl.is-start .stepctl__count {
+  display: none;
+}
+.stepctl.is-start .stepctl__next {
+  min-width: 200px;
 }

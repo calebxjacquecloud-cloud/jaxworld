@@ -20,6 +20,7 @@ import IntroOverlay from './wash/IntroOverlay';
 import OutroOverlay from './wash/OutroOverlay';
 import Hero from './Hero';
 import FastLane from './wash/FastLane';
+import StepControls from './wash/StepControls';
 import { reportWashAct } from '@/lib/acts';
 
 /**
@@ -103,6 +104,7 @@ export default function WashExperience() {
         <Hero bus={bus} />
         <WashCopy bus={bus} />
         <WashTimeline bus={bus} />
+        {stepped && <StepControls bus={bus} progress={steps} sectionRef={sectionRef} />}
         <FastLane bus={bus} sectionRef={sectionRef} progress={stepped ? steps : scrubbed} stops={SWIPE_STOPS} stepped={stepped} />
       </div>
     </section>
