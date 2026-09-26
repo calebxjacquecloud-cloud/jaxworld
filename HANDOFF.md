@@ -118,6 +118,7 @@ geometry.
 
 ## Recent changes (latest first)
 
+- Phones: product reveal is a bottom panel (no longer over the car) with a headline sized to fit the wide Unbounded face; market stats, condition record and small-screen titles tightened so nothing runs off at 320–430px. Verified with the real brand fonts loaded locally (the sandbox can't reach Google Fonts, and the fallback font is much narrower).
 - Phones: Start responds instantly. The first stop sits at the end of the prelude's opening hold (u 0.078), the Start step plays at a linear pace, and the garage door lifts with an ease-out.
 - Phones: the wash is one Next per beat (`BEAT_STOPS` in lib/washStages.ts: 22 steps in all). Each tap plays the whole move and pauses with that beat's panel (and close-up window) up. Top-down view pulled back on portrait screens (`vPortraitK` 0.56) so the parked arms stay in frame. Step playback speed 0.026, max 6.5 s per step.
 - Phones: Start drives straight out of the garage to "The problem"; each Next takes one corner and shows the next statement (prelude stops `[0, 0.37, 0.54, 0.71, 0.88]` in `SWIPE_STOPS`). The fast lane (60-second / Skip) is desktop-only.
