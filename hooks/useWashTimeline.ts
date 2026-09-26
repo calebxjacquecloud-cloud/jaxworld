@@ -6,7 +6,8 @@ import { discreteProgress } from '@/lib/washStages';
 import { WASH_TRACKS } from '@/data/washSequence';
 import { INTRO_ONLY_CHANNELS, INTRO_TRACKS } from '@/data/introSequence';
 import { OUTRO_ONLY_CHANNELS, OUTRO_TRACKS } from '@/data/outroSequence';
-import { INTRO, OUTRO } from '@/lib/animationConfig';
+import { INTRO, OUTRO, PRELUDE } from '@/lib/animationConfig';
+import { PRELUDE_ONLY_CHANNELS, PRELUDE_TRACKS } from '@/data/preludeSequence';
 import type { WashScene } from '@/components/wash/WashScene';
 import type { ProgressRef } from './useScrollProgress';
 import { prefersReducedMotion } from './useReducedMotion';
@@ -20,6 +21,8 @@ export interface FrameContext {
   u: number;
   /** Outro ("pack it up") progress: 0 until the wash ends, then 0→1. */
   o: number;
+  /** Prelude (garage + road trip) progress: 0→1, then 1 for the rest of the section. */
+  pre: number;
   state: ChannelValues;
   scene: WashScene | null;
   time: number;
@@ -32,39 +35,51 @@ export interface FrameBus {
 }
 
 /**
- * Where the scroll is: main timeline `t`, desktop intro `u`, outro `o`.
+ * Where the scroll is: prelude `pre`, main timeline `t`, desktop intro `u`, outro `o`.
  *
- * Desktop (scrub): progress 0–1 covers main + intro + outro, so it is
- * stretched to that combined length and the intro spliced in at INTRO.at.
- * Touch (stepped): progress already runs 0 → 1 + OUTRO.length (see SWIPE_STOPS).
+ * Desktop (scrub): progress 0–1 covers prelude + main + intro + outro, so it is
+ * stretched to that combined length; the prelude comes first and the intro is
+ * spliced in at INTRO.at.
+ * Touch (stepped): progress already runs 0 → PRELUDE + 1 + OUTRO lengths (see SWIPE_STOPS).
  * Reduced motion (desktop): each chapter snaps to its hold frame; the outro
  * snaps to its final frame.
  */
-function mapProgress(v: number, stepped: boolean, intro: boolean, discrete: boolean, out: { t: number; u: number; o: number }) {
+function mapProgress(
+  v: number,
+  stepped: boolean,
+  intro: boolean,
+  discrete: boolean,
+  out: { t: number; u: number; o: number; pre: number },
+) {
+  const P = PRELUDE.length;
   const L = OUTRO.length;
   let E: number;
   out.u = 0;
+  out.o = 0;
   if (stepped) E = v;
-  else {
-    const D = intro ? INTRO.length : 0;
-    E = v * (1 + D + L);
-    if (intro) {
-      if (E >= INTRO.at && E < INTRO.at + D) {
-        out.t = INTRO.at;
-        out.u = (E - INTRO.at) / D;
-        out.o = 0;
-        return out;
-      }
-      if (E >= INTRO.at + D) {
-        E -= D;
-        out.u = 1;
-      }
+  else E = v * (P + 1 + (intro ? INTRO.length : 0) + L);
+  // prelude (garage + road trip) comes first
+  if (E < P) {
+    out.pre = discrete ? (E < P * 0.5 ? 0 : 1) : Math.max(0, E / P);
+    out.t = 0;
+    return out;
+  }
+  out.pre = 1;
+  E -= P;
+  if (!stepped && intro) {
+    const D = INTRO.length;
+    if (E >= INTRO.at && E < INTRO.at + D) {
+      out.t = INTRO.at;
+      out.u = (E - INTRO.at) / D;
+      return out;
+    }
+    if (E >= INTRO.at + D) {
+      E -= D;
+      out.u = 1;
     }
   }
-  if (E <= 1) {
-    out.t = discrete ? discreteProgress(Math.max(0, E)) : Math.max(0, E);
-    out.o = 0;
-  } else {
+  if (E <= 1) out.t = discrete ? discreteProgress(Math.max(0, E)) : Math.max(0, E);
+  else {
     out.t = 1;
     out.o = discrete ? 1 : Math.min(1, (E - 1) / L);
   }
@@ -101,8 +116,8 @@ export function useWashTimeline(
     const el = sectionRef.current;
     if (!el) return;
     const state: ChannelValues = {};
-    const ctx: FrameContext = { t: 0, p: 0, u: 0, o: 0, state, scene: null, time: 0 };
-    const split = { t: 0, u: 0, o: 0 };
+    const ctx: FrameContext = { t: 0, p: 0, u: 0, o: 0, pre: 0, state, scene: null, time: 0 };
+    const split = { t: 0, u: 0, o: 0, pre: 0 };
     const start = performance.now();
     const reduced = prefersReducedMotion();
     let visible = true;
@@ -137,10 +152,13 @@ export function useWashTimeline(
       else for (const k of INTRO_ONLY_CHANNELS) state[k] = 0;
       if (split.o > 0) sampleAll(OUTRO_TRACKS, split.o, state);
       else for (const k of OUTRO_ONLY_CHANNELS) state[k] = 0;
+      if (split.pre < 1) sampleAll(PRELUDE_TRACKS, split.pre, state);
+      else for (const k of PRELUDE_ONLY_CHANNELS) state[k] = 0;
       ctx.t = split.t;
-      ctx.p = progress.stepped ? p / (1 + OUTRO.length) : p;
+      ctx.p = progress.stepped ? p / (PRELUDE.length + 1 + OUTRO.length) : p;
       ctx.u = split.u;
       ctx.o = split.o;
+      ctx.pre = split.pre;
       ctx.time = (now - start) / 1000;
       ctx.scene = scene;
       if (scene) {

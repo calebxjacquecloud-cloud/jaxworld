@@ -222,6 +222,14 @@ export class Bay {
     this.group.add(fill);
   }
 
+  /** Centre the key light (and its shadow camera) on a point of the floor. */
+  focus(x: number, z: number) {
+    if (this.key.target.position.x === x && this.key.target.position.z === z) return;
+    this.key.target.position.set(x, 0, z);
+    this.key.position.set(x + 7, 13, z + 9);
+    this.key.target.updateMatrixWorld();
+  }
+
   /** Warmer, brighter key light for the final beauty shot. */
   setGlam(v: number) {
     this.key.intensity = 2.3 + 0.9 * v;

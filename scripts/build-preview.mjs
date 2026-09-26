@@ -18,6 +18,8 @@ await build({
   jsx: 'automatic',
   alias: { '@': root },
   define: { 'process.env.NODE_ENV': '"production"' },
+  // brand art is inlined so the single-file preview needs no asset server
+  loader: { '.png': 'dataurl' },
   outfile: resolve(out, 'bundle.js'),
   logLevel: 'error',
 });

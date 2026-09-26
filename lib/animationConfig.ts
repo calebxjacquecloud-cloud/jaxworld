@@ -6,6 +6,12 @@
  */
 
 /**
+ * Garage + road-trip prelude before the wash, on every device (see
+ * data/preludeSequence.ts). `length` is extra scroll as a fraction of the main timeline.
+ */
+export const PRELUDE = { length: 0.34 };
+
+/**
  * Desktop-only "meet the bay" intro, spliced into the scroll right after the
  * camera pylons rise (see data/introSequence.ts). While it plays, the main
  * timeline holds at `at`; `length` is extra scroll, as a fraction of the main timeline.
@@ -25,7 +31,7 @@ const BASE_WASH_VH = 3200;
 
 export const SCROLL = {
   /** Desktop: height of the pinned wash scene in viewport heights (scrolling scrubs the timeline + intro). */
-  washSectionVh: Math.round(BASE_WASH_VH * (1 + INTRO.length + OUTRO.length)),
+  washSectionVh: Math.round(BASE_WASH_VH * (PRELUDE.length + 1 + INTRO.length + OUTRO.length)),
   /** Desktop: GSAP scrub smoothing in seconds (higher = the scene eases after each wheel notch instead of jumping). */
   scrub: 1.4,
   /** Touch: one swipe = one step, played at a steady pace (see hooks/useStepProgress.ts). */

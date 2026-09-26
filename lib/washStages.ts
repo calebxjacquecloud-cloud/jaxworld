@@ -1,4 +1,4 @@
-import { OUTRO } from './animationConfig';
+import { OUTRO, PRELUDE } from './animationConfig';
 
 /**
  * The twelve chapters of the wash demo on the normalized 0–1 scroll timeline.
@@ -62,9 +62,12 @@ const KEY_STOPS: number[] = [
 
 /** Phone steps: every key stop plus a midpoint between each pair, so one swipe covers half the ground. */
 export const SWIPE_STOPS: number[] = [
-  ...KEY_STOPS.flatMap((t, i) => (i === 0 ? [t] : [+((KEY_STOPS[i - 1] + t) / 2).toFixed(4), t])),
-  // outro (data/outroSequence.ts), past the end of the main timeline: 1 + OUTRO.length × outro progress
-  ...[0.1, 0.2, 0.31, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.91, 0.96, 1].map((u) => +(1 + OUTRO.length * u).toFixed(4)),
+  // prelude (data/preludeSequence.ts): PRELUDE.length × prelude progress
+  ...[0, 0.14, 0.22, 0.31, 0.37, 0.48, 0.54, 0.65, 0.71, 0.82, 0.88].map((u) => +(PRELUDE.length * u).toFixed(4)),
+  // main timeline, after the prelude
+  ...KEY_STOPS.flatMap((t, i) => (i === 0 ? [t] : [+((KEY_STOPS[i - 1] + t) / 2).toFixed(4), t])).map((t) => +(PRELUDE.length + t).toFixed(4)),
+  // outro (data/outroSequence.ts), past the end of the main timeline
+  ...[0.1, 0.2, 0.31, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.91, 0.96, 1].map((u) => +(PRELUDE.length + 1 + OUTRO.length * u).toFixed(4)),
 ];
 
 /** Reduced-motion mapping: snap continuous progress to the current chapter's hold frame. */

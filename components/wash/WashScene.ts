@@ -20,6 +20,8 @@ import { CameraArray, pylonPositions } from './CameraArray';
 import { Bay } from './Bay';
 import { ToolHeadScene } from './ToolHead';
 import { Utilities } from './Utilities';
+import { Prelude } from './Prelude';
+import { routeCamAz, routePose } from '@/lib/roadPath';
 import { ShippingContainer } from './ShippingContainer';
 import { PACK_PLAN, unitProgress } from '@/data/outroSequence';
 import { CONTAINER, GANTRY } from '@/lib/animationConfig';
@@ -71,6 +73,7 @@ export class WashScene {
   private toolStep = 0;
   private tool: ToolHeadScene;
   private utilities: Utilities;
+  private prelude: Prelude;
   private container: ShippingContainer;
   /** Pack-plan index by unit id. */
   private packIndex = new Map<string, number>();
@@ -123,6 +126,8 @@ export class WashScene {
 
     this.pylons = new CameraArray(armMats);
     this.tool = new ToolHeadScene(this.scene.environment, armMats);
+    this.prelude = new Prelude();
+    this.scene.add(this.prelude.group);
     this.utilities = new Utilities(armMats);
     this.scene.add(this.utilities.group);
     this.container = new ShippingContainer(armMats.chrome);
@@ -191,7 +196,12 @@ export class WashScene {
     if (this.disposed) return;
 
     // ── vehicle ──
-    arrivalPose(s.drive, this.pose);
+    // prelude: the car follows the street route from the garage; afterwards, the arrival path
+    if (s.pOn > 0.5) routePose(s.pDist, this.pose);
+    else arrivalPose(s.drive, this.pose);
+    this.prelude.update(s.door);
+    // keep the sun (and its shadow map) centred on the action: the car during the prelude, the bay after
+    this.bay.focus(s.pOn > 0.5 ? this.pose.x : 0, s.pOn > 0.5 ? this.pose.z : 0);
     // outro: the finished car drives straight out of the bay along +z
     this.carRoot.position.set(this.pose.x, 0, this.pose.z + s.exitZ);
     this.carRoot.rotation.y = this.pose.yaw + s.carYaw * DEG;
@@ -282,7 +292,8 @@ export class WashScene {
     const aspect = this.width / this.height;
     const narrow = aspect < REF_ASPECT ? Math.pow(REF_ASPECT / aspect, 0.9) - 1 : 0;
     const o = this.orbit;
-    o.az = s.vAz;
+    // prelude: the camera rides with the car so its nose stays pointing up the screen
+    o.az = s.pFollowAz > 0 ? s.vAz + (routeCamAz(this.pose.yaw) + s.pAzOff - s.vAz) * s.pFollowAz : s.vAz;
     o.el = s.vEl;
     o.dist = s.vDist * (1 + narrow * s.vPortraitK);
     o.tx = s.vTx + (this.pose.x - s.vTx) * s.vFollow;
@@ -448,6 +459,7 @@ export class WashScene {
     this.disposed = true;
     this.vehicle.dispose();
     this.tool.dispose();
+    this.prelude.dispose();
     this.container.dispose();
     this.bay.dispose();
     this.scene.traverse((o) => {

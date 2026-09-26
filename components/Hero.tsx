@@ -13,10 +13,11 @@ export default function Hero({ bus }: { bus: FrameBus }) {
 
   useEffect(
     () =>
-      bus.add(({ t }) => {
+      bus.add(({ t, pre }) => {
         const el = ref.current;
         if (!el) return;
-        const o = 1 - clamp01(t / 0.026);
+        // hidden during the garage + road-trip prelude; arrives as the car lands on the arrival lane
+        const o = (1 - clamp01(t / 0.026)) * clamp01((pre - 0.94) / 0.06);
         const prev = heroOpacity.current;
         setFade(el, o, `translate3d(0, ${(-t * 1600).toFixed(1)}px, 0)`);
         // lets the progress rail stay out of the way until the hero clears

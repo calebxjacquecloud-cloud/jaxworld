@@ -5,7 +5,7 @@ import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { useStepProgress } from '@/hooks/useStepProgress';
 import { useWashTimeline } from '@/hooks/useWashTimeline';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { INTRO, OUTRO, SCROLL, isTouchLayout } from '@/lib/animationConfig';
+import { INTRO, OUTRO, PRELUDE, SCROLL, isTouchLayout } from '@/lib/animationConfig';
 import { SWIPE_STOPS } from '@/lib/washStages';
 import type { WashScene } from './wash/WashScene';
 import VehicleStage from './wash/VehicleStage';
@@ -28,9 +28,9 @@ import Hero from './Hero';
  * step (hooks/useStepProgress.ts).
  */
 /** Scroll fraction of the desktop section where the outro's "can move" copy is up. */
-const MODULAR_ANCHOR_P = (1 + INTRO.length + OUTRO.length * 0.24) / (1 + INTRO.length + OUTRO.length);
+const MODULAR_ANCHOR_P = (PRELUDE.length + 1 + INTRO.length + OUTRO.length * 0.24) / (PRELUDE.length + 1 + INTRO.length + OUTRO.length);
 /** Phone step for the same moment. */
-const MODULAR_STEP = SWIPE_STOPS.findIndex((v) => v >= 1 + OUTRO.length * 0.3);
+const MODULAR_STEP = SWIPE_STOPS.findIndex((v) => v >= PRELUDE.length + 1 + OUTRO.length * 0.3);
 const STEP_JUMPS = { '#modular': MODULAR_STEP };
 
 export default function WashExperience() {
