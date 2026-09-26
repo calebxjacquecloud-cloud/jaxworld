@@ -118,6 +118,7 @@ geometry.
 
 ## Recent changes (latest first)
 
+- Phones: Start responds instantly. The first stop sits at the end of the prelude's opening hold (u 0.078), the Start step plays at a linear pace, and the garage door lifts with an ease-out.
 - Phones: the wash is one Next per beat (`BEAT_STOPS` in lib/washStages.ts: 22 steps in all). Each tap plays the whole move and pauses with that beat's panel (and close-up window) up. Top-down view pulled back on portrait screens (`vPortraitK` 0.56) so the parked arms stay in frame. Step playback speed 0.026, max 6.5 s per step.
 - Phones: Start drives straight out of the garage to "The problem"; each Next takes one corner and shows the next statement (prelude stops `[0, 0.37, 0.54, 0.71, 0.88]` in `SWIPE_STOPS`). The fast lane (60-second / Skip) is desktop-only.
 - Phones only: on-screen step controls (`components/wash/StepControls.tsx`): Start on the garage screen, then ← Back / Next → with a step counter, Continue ↓ on the last step. Swipes still work. Bottom-anchored phone panels sit above the bar via `--ctl-h` on `.wash--stepped`; the garage door says "Press Start" on touch layouts.

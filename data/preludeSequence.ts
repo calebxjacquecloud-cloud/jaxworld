@@ -65,7 +65,7 @@ const tb = new TrackBuilder({ ...shared, ...only });
 const M = (t0: number, t1: number, set: ChannelValues, e: Parameters<typeof tb.move>[3] = 'inOut') => tb.move(t0, t1, set, e);
 
 /* 1 · garage door (hold, then it swings up) */
-M(0.08, 0.17, { door: 1 });
+M(0.08, 0.17, { door: 1 }, 'out');
 M(0.08, 0.15, { vDist: 9.2 });
 
 /* 2 · pull out, rise to top-down and ride along */

@@ -50,6 +50,7 @@ export function useStepProgress(
     const canStep = (dir: 1 | -1) => engaged() && (dir > 0 ? index < last : index > 0);
 
     const goTo = (i: number, instant = false) => {
+      const from = index;
       index = Math.max(0, Math.min(last, i));
       proxy.index = index;
       const target = stops[index];
@@ -63,7 +64,9 @@ export function useStepProgress(
         value: target,
         raw: target,
         duration: reduced ? 0 : Math.min(cfg.maxDuration, Math.max(cfg.minDuration, dist / cfg.speed)),
-        ease: 'power1.inOut',
+        // leaving the first screen (Start) moves at a steady pace from the first frame, so there's
+        // no slow ease-in before the door lifts; every other step eases in and out
+        ease: from === 0 && index === 1 ? 'none' : 'power1.inOut',
       });
     };
     const step = (dir: 1 | -1) => goTo(index + dir);

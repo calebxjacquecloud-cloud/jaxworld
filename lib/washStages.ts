@@ -85,7 +85,9 @@ export const SWIPE_STOPS: number[] = [
   // prelude (data/preludeSequence.ts): PRELUDE.length × prelude progress. One step per statement:
   // garage → (Start) out of the garage and round the first corner to "The problem" → each Next
   // takes the next corner and brings up the next statement.
-  ...[0, 0.37, 0.54, 0.71, 0.88].map((u) => PRELUDE.length * u),
+  // The first stop sits at the end of the prelude's opening hold (the door starts to lift at 0.08),
+  // so Start moves immediately instead of first playing through a still frame.
+  ...[0.078, 0.37, 0.54, 0.71, 0.88].map((u) => PRELUDE.length * u),
   ...BEAT_STOPS.main.map((t) => mainToScroll(t, PRELUDE.length)),
   ...BEAT_STOPS.intro.map((u) => introToScroll(u, PRELUDE.length)),
   ...BEAT_STOPS.outro.map((u) => mainToScroll(1, PRELUDE.length) + OUTRO.length * u),
