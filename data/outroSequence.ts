@@ -103,34 +103,29 @@ export function unitProgress(pack: number, i: number, n = PACK_PLAN.length): num
   return Math.min(1, Math.max(0, (pack - start) / PACK_MOVE));
 }
 
-/* ───────────── labels shown before packing ───────────── */
+/* ───────────── packing checklist ───────────── */
 
-export interface EquipmentLabel {
-  /** Pack unit whose move hides the label. */
-  unit: string;
+/** Checklist rows, in loading order. A row slides in when its first unit lifts and is checked when its last unit lands. */
+export interface PackGroup {
+  id: string;
   label: string;
   sub?: string;
-  /** World anchor. */
-  at: [number, number, number];
-  tone: 'chrome' | 'orange' | 'cyan';
-  /** Hidden on phones, where only primary labels fit. */
-  minor?: boolean;
-  /** Card hangs below the marker instead of above it (keeps neighbours apart). */
-  below?: boolean;
+  units: string[];
 }
 
-const util = (id: string) => UTILITIES.find((u) => u.id === id)!;
-const top = (id: string, dx = 0): [number, number, number] => [util(id).at[0] + dx, util(id).h, util(id).at[1]];
+const ids = (prefix: string) => PACK_PLAN.filter((p) => p.id.startsWith(prefix)).map((p) => p.id);
 
-export const EQUIPMENT_LABELS: EquipmentLabel[] = [
-  { unit: 'water', label: 'WATER STORAGE', at: top('water'), tone: 'orange' },
-  { unit: 'pump', label: 'PRESSURIZATION', sub: 'pump + pressure vessel', at: top('pump'), tone: 'orange', below: true },
-  { unit: 'tub-wash', label: 'CHEMISTRY TUBS ×4', at: top('tub-tire', -0.3), tone: 'chrome', minor: true },
-  { unit: 'rack', label: 'CONTROL, COMPUTE + NETWORK', at: top('rack', 0.6), tone: 'orange', below: true, minor: true },
-  { unit: 'reel-hp', label: 'HOSE REELS ×2', at: top('reel-hp', 0.6), tone: 'chrome', minor: true },
-  { unit: 'pylon-0', label: 'CAMERA PYLONS ×8', sub: 'masts retract for transport', at: [-2.07, 1.3, 4.31], tone: 'cyan' },
-  { unit: 'arm-b', label: 'ROBOTIC ARMS ×2', sub: 'fold to travel height', at: [-5.5, 2.1, -2.4], tone: 'orange' },
-  { unit: 'rail-a-outer', label: 'XY TRACKS + STAGES', sub: '4 rails · 2 bridges', at: [9.6, 0.1, -3.3], tone: 'chrome', minor: true },
+export const PACK_LIST: PackGroup[] = [
+  { id: 'rails', label: 'XY tracks', sub: '4 rails', units: ids('rail-') },
+  { id: 'bridges', label: 'Arm stage bridges', sub: '×2', units: ids('bridge-') },
+  { id: 'water', label: 'Water storage', units: ['water'] },
+  { id: 'pump', label: 'Pressurization system', sub: 'pump + pressure vessel', units: ['pump'] },
+  { id: 'tubs', label: 'Chemistry tubs', sub: 'wash · tire · wax · spot-free', units: ids('tub-') },
+  { id: 'rack', label: 'Controller & compute', units: ['rack'] },
+  { id: 'cabinet', label: 'Network & monitoring', units: ['cabinet'] },
+  { id: 'reels', label: 'Hose reels', sub: '×2', units: ids('reel-') },
+  { id: 'pylons', label: 'Camera pylons', sub: '×8', units: ids('pylon-') },
+  { id: 'arms', label: 'Robotic arms', sub: '×2', units: ids('arm-') },
 ];
 
 /* ───────────── timeline ───────────── */
@@ -148,8 +143,6 @@ const only: ChannelValues = {
   exitZ: 0,
   /** Utilities rise from their floor pockets. */
   util: 0,
-  /** Equipment labels. */
-  labels: 0,
   /** Container slides in (0 = parked off to the right, 1 = in place). */
   contIn: 0,
   /** Overall packing progress (per-unit timing: unitProgress). */
@@ -174,7 +167,6 @@ M(0.04, 0.19, { exitZ: 30 }, 'inOut');
 M(0.15, 0.3, { vAz: 0, vEl: 60, vDist: 45, vTx: 0, vTy: 0, vTz: 0.6, vFov: 32, vFrameX: 0.1, vFrameY: -0.02, vMobileY: 0.16, vPortraitK: 0.42 });
 M(0.2, 0.3, { util: 1 });
 M(0.21, 0.29, { camRise: 0.42 });
-M(0.25, 0.31, { labels: 1 });
 
 /* 3 · container arrives, everything packs */
 M(0.27, 0.37, { contIn: 1 });
@@ -205,20 +197,11 @@ export const OUTRO_COPY: CopyBlock[] = [
   {
     id: 'canmove',
     in: 0.22,
-    out: 0.44,
+    out: 0.37,
     place: 'left',
     eyebrow: '13 · Modular',
     title: 'Car wash infrastructure that can move.',
     body: 'Everything behind the wash, most of it never on screen: water, pressure, chemistry, compute, hoses, tracks, cameras and arms.',
-  },
-  {
-    id: 'packs',
-    in: 0.47,
-    out: 0.84,
-    place: 'left',
-    eyebrow: '14 · Pack up',
-    title: 'One 40 ft high-cube container.',
-    body: 'The design target: the complete system packs into a standard shipping container, so it can move by truck, rail or ship.',
   },
   {
     id: 'shipped',

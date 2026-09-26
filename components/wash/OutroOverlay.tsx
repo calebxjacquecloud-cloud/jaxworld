@@ -2,57 +2,68 @@
 
 import { useEffect, useRef } from 'react';
 import type { FrameBus } from '@/hooks/useWashTimeline';
-import { EQUIPMENT_LABELS, PACK_PLAN, unitProgress } from '@/data/outroSequence';
-import { clamp01 } from '@/lib/timeline';
+import { PACK_LIST, PACK_PLAN, unitProgress } from '@/data/outroSequence';
+import { windowed } from '@/lib/timeline';
 import { setFade } from '@/lib/domWrite';
-import type { ScreenPoint } from './WashScene';
 
 const unitIndex = new Map(PACK_PLAN.map((s, i) => [s.id, i]));
+const groups = PACK_LIST.map((g) => g.units.map((u) => unitIndex.get(u) ?? 0));
 
 /**
- * Outro callouts: names every piece of equipment once it is on screen, and
- * drops each label as its unit lifts off for the container.
+ * Packing checklist for the outro. Each row slides in as the first piece of
+ * its group lifts off for the container, and gets a green check once the
+ * last piece has landed in its slot.
  */
 export default function OutroOverlay({ bus }: { bus: FrameBus }) {
-  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const panel = useRef<HTMLDivElement>(null);
+  const rows = useRef<(HTMLLIElement | null)[]>([]);
+  const count = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const pt: ScreenPoint = { x: 0, y: 0, visible: false };
-    return bus.add(({ o, state: s, scene }) => {
-      EQUIPMENT_LABELS.forEach((l, i) => {
-        const el = refs.current[i];
-        if (!el) return;
-        if (!scene || o <= 0 || s.labels <= 0.001) {
-          setFade(el, 0);
-          return;
-        }
-        const leaving = clamp01(unitProgress(s.pack, unitIndex.get(l.unit) ?? 0) * 8);
-        const stagger = clamp01(s.labels * (EQUIPMENT_LABELS.length + 4) / 4 - i * 0.25);
-        const op = stagger * (1 - leaving);
-        scene.projectPoint(l.at[0], l.at[1], l.at[2], pt);
-        setFade(el, pt.visible ? op : 0, `translate3d(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px, 0)`);
+    let lastDone = -1;
+    return bus.add(({ o, state: s }) => {
+      const show = o > 0 ? windowed(o, 0.365, 0.93, 0.02) : 0;
+      setFade(panel.current, show, `translate3d(0, ${((1 - show) * 12).toFixed(1)}px, 0)`);
+      if (show <= 0) return;
+      let done = 0;
+      groups.forEach((units, i) => {
+        const li = rows.current[i];
+        const started = units.some((u) => unitProgress(s.pack, u) > 0);
+        const landed = units.every((u) => unitProgress(s.pack, u) >= 1);
+        if (landed) done++;
+        li?.classList.toggle('is-in', started);
+        li?.classList.toggle('is-done', landed);
       });
+      if (done !== lastDone && count.current) {
+        lastDone = done;
+        count.current.textContent = `${done}/${PACK_LIST.length}`;
+      }
     });
   }, [bus]);
 
   return (
-    <div className="annotations" aria-hidden="true">
-      {EQUIPMENT_LABELS.map((l, i) => (
-        <div
-          key={l.unit}
-          ref={(el) => {
-            refs.current[i] = el;
-          }}
-          className={`anno anno--${l.tone}${l.minor ? ' anno--minor' : ''}${l.below ? ' anno--below' : ''}`}
-        >
-          <span className="anno__dot" />
-          <span className="anno__leader" />
-          <span className="anno__card">
-            <span className="anno__label">{l.label}</span>
-            {l.sub && <span className="anno__sub">{l.sub}</span>}
-          </span>
-        </div>
-      ))}
+    <div className="packlist" ref={panel}>
+      <p className="eyebrow">
+        14 · Pack up <span className="packlist__count mono" ref={count}>0/{PACK_LIST.length}</span>
+      </p>
+      <h2 className="packlist__title">One 40 ft high-cube container.</h2>
+      <ol className="packlist__rows">
+        {PACK_LIST.map((g, i) => (
+          <li
+            key={g.id}
+            ref={(el) => {
+              rows.current[i] = el;
+            }}
+          >
+            <span className="packlist__tick" aria-hidden="true">
+              ✓
+            </span>
+            <span className="packlist__label">{g.label}</span>
+            {g.sub && <span className="packlist__sub mono">{g.sub}</span>}
+          </li>
+        ))}
+      </ol>
+      <p className="packlist__note">Design target: the complete system in one standard shipping container.</p>
     </div>
   );
 }
