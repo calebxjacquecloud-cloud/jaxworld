@@ -1,0 +1,348 @@
+/*
+ * Jax World · VC concept — design tokens and shared type.
+ * Same brand palette as the original concept, used with more restraint:
+ * charcoal for the machine, cream for the thesis, burnt orange as the single
+ * accent, cyan reserved for sensing, green/red only for status.
+ * Everything is scoped under .vx or vx- class names so it can't touch the
+ * original site (which shares the root layout).
+ */
+.vx {
+  --vx-ink: #121417;
+  --vx-ink-2: #181b1f;
+  --vx-ink-3: #22262b;
+  --vx-line: rgba(236, 229, 216, 0.12);
+  --vx-line-2: rgba(236, 229, 216, 0.22);
+  --vx-text: #ece5d8;
+  --vx-muted: #a2a5aa;
+  --vx-dim: #6d7278;
+  --vx-cream: #f3ebdd;
+  --vx-cream-2: #e8dcc6;
+  --vx-paper-ink: #1d1b18;
+  --vx-paper-muted: #5f574c;
+  --vx-orange: #d9622b;
+  --vx-orange-2: #f08a4b;
+  --vx-cyan: #3fe0e8;
+  --vx-green: #5fe08a;
+  --vx-red: #e5483b;
+  --vx-display: 'Unbounded', 'Arial Black', 'Helvetica Neue', sans-serif;
+  --vx-script: 'Yellowtail', 'Brush Script MT', cursive;
+  --vx-body: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --vx-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --vx-gutter: clamp(16px, 4.2vw, 64px);
+  --vx-safe-top: env(safe-area-inset-top, 0px);
+  --vx-header: calc(var(--vx-safe-top) + 68px);
+  --vx-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --vx-panel: rgba(18, 20, 23, 0.72);
+  --vx-blur: blur(10px) saturate(1.1);
+
+  background: var(--vx-ink);
+  color: var(--vx-text);
+  font-family: var(--vx-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+@media (pointer: coarse), (max-width: 760px) {
+  .vx {
+    --vx-panel: rgba(18, 20, 23, 0.9);
+    --vx-blur: none;
+    --vx-header: calc(var(--vx-safe-top) + 58px);
+  }
+}
+.vx *,
+.vx *::before,
+.vx *::after {
+  box-sizing: border-box;
+}
+.vx :where(h1, h2, h3, h4, p, ol, ul, figure) {
+  margin: 0;
+}
+.vx :where(ol, ul) {
+  padding: 0;
+  list-style: none;
+}
+.vx :where(a) {
+  color: inherit;
+}
+.vx :where(button) {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.vx :focus-visible {
+  outline: 2px solid var(--vx-orange-2);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.vx .mono {
+  font-family: var(--vx-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── type ── */
+.vx-display {
+  font-family: var(--vx-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 0.94;
+}
+.vx-h2 {
+  font-family: var(--vx-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(1.45rem, 0.9rem + 2vw, 2.85rem);
+  text-wrap: balance;
+}
+.vx-h3 {
+  font-family: var(--vx-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  line-height: 1.06;
+  font-size: clamp(1.15rem, 0.85rem + 1.1vw, 1.9rem);
+  text-wrap: balance;
+}
+.vx-body {
+  font-size: clamp(0.98rem, 0.92rem + 0.2vw, 1.08rem);
+  color: var(--vx-muted);
+  max-width: 32rem;
+  text-wrap: pretty;
+}
+.vx-eyebrow {
+  font-family: var(--vx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--vx-orange-2);
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+.vx-note {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vx-dim);
+}
+.vx-accent {
+  color: var(--vx-orange-2);
+}
+.vx-step {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.1em;
+  height: 1.8em;
+  padding: 0 0.5em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+.vx-wordmark {
+  font-family: var(--vx-script);
+  color: var(--vx-orange-2);
+  font-size: clamp(2.8rem, 1.6rem + 4.5vw, 5.6rem);
+  line-height: 1.05;
+  transform: rotate(-4deg);
+  transform-origin: left center;
+  margin: 0.1em 0 0.2em -0.04em;
+  white-space: nowrap;
+}
+.vx-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── header ── */
+.vx-header {
+  position: fixed;
+  z-index: 60;
+  top: calc(var(--vx-safe-top) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 1360px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 8px 7px 18px;
+  border-radius: 999px;
+  background: rgba(18, 20, 23, 0.74);
+  border: 1px solid var(--vx-line);
+  backdrop-filter: var(--vx-blur);
+  -webkit-backdrop-filter: var(--vx-blur);
+  transition: opacity 0.4s var(--vx-ease), transform 0.4s var(--vx-ease);
+}
+.vx-header.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -12px);
+}
+.vx-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.vx-logo__burst {
+  width: 16px;
+  height: 16px;
+  color: var(--vx-orange);
+  align-self: center;
+}
+.vx-logo__jax {
+  font-family: var(--vx-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+}
+.vx-logo__world {
+  font-family: var(--vx-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.24em;
+  color: var(--vx-muted);
+}
+.vx-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vx-link-btn {
+  border: 0;
+  background: transparent;
+  font-size: 0.84rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--vx-muted);
+  transition: color 0.2s, background 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.vx-link-btn:hover {
+  color: var(--vx-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+.vx-cta-btn {
+  border: 0;
+  background: var(--vx-orange);
+  color: #1a0e07;
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.vx-cta-btn:hover {
+  background: var(--vx-orange-2);
+}
+
+/* story progress: 01 PROBLEM … 06 FUTURE */
+.vx-progress {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  transition: opacity 0.3s var(--vx-ease);
+}
+.vx-progress ol {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.vx-progress li {
+  display: grid;
+  gap: 5px;
+  font-family: var(--vx-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vx-dim);
+  transition: color 0.3s;
+}
+.vx-progress button {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  display: flex;
+  gap: 6px;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+.vx-progress__bar {
+  height: 2px;
+  width: 64px;
+  background: var(--vx-line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 4px;
+}
+.vx-progress__bar i {
+  display: block;
+  height: 100%;
+  background: var(--vx-orange-2);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.vx-progress li.is-now {
+  color: var(--vx-text);
+}
+.vx-progress li.is-done {
+  color: var(--vx-muted);
+}
+.vx-progress li:not(.is-now) .vx-progress__name {
+  display: none;
+}
+.vx-progress li.is-now .vx-progress__name {
+  color: var(--vx-orange-2);
+}
+@media (max-width: 1100px) {
+  .vx-progress__bar {
+    width: 36px;
+  }
+}
+@media (max-width: 860px) {
+  .vx-header__overview {
+    display: none;
+  }
+  .vx-progress {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% + 6px);
+    padding: 5px 10px 6px;
+    border-radius: 999px;
+    background: rgba(18, 20, 23, 0.86);
+    border: 1px solid var(--vx-line);
+  }
+  .vx-progress__bar {
+    width: 22px;
+  }
+  .vx-progress li {
+    font-size: 0.56rem;
+  }
+}
+@media (max-width: 420px) {
+  .vx-header {
+    padding: 6px 6px 6px 14px;
+  }
+  .vx-logo__world {
+    display: none;
+  }
+  .vx-cta-btn__long {
+    display: none;
+  }
+  .vx-progress__bar {
+    width: 16px;
+  }
+}

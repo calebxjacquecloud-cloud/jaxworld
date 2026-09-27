@@ -3,6 +3,11 @@
 Read this first. It is the context a new session needs to keep working on this
 project without re-deriving decisions or breaking things that were fixed.
 
+> **Two concepts live in this repo.** This file covers the original concept at `/`.
+> A second, independent VC / board-advisor concept lives at `/vc` (folder `vc/`);
+> see [VC_CONCEPT.md](VC_CONCEPT.md). It imports some of the original's 3D modules
+> read-only, so if you change `components/wash/*`, `lib/*` or `data/*`, check both.
+
 ## Where the code lives
 
 - **Repository:** `calebxjacquecloud-cloud/jaxworld` (GitHub), the site sits at the repo root.

@@ -9,7 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "preview:build": "node scripts/build-preview.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "preview:vc": "node scripts/build-vc-preview.mjs",
+    "check:vc": "node scripts/check-vc.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
