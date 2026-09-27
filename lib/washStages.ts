@@ -55,7 +55,7 @@ const BEAT_STOPS = {
   main: [
     0.04, // Introducing the Carwash-O-Matic
     0.16, // 01 See: see the vehicle before touching it
-    0.186, // condition findings on the car
+    0.19, // existing marks: every finding listed (all land by 0.183; panel up until 0.192) on the car
     0.21, // 02 Think: the cleaning plan
     0.238, // 03 Move: the robots adapt around the car
     0.32, // 04 Clean: follow the surface (rinse)

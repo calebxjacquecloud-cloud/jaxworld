@@ -32,7 +32,7 @@ export default function ConditionPanel({ bus }: { bus: FrameBus }) {
           if (on && f.recheck) queued++;
         });
         if (count.current) count.current.textContent = String(queued);
-        if (bar.current) bar.current.style.transform = `scaleX(${clamp01((t - 0.168) / 0.03).toFixed(3)})`;
+        if (bar.current) bar.current.style.transform = `scaleX(${clamp01((t - 0.168) / 0.016).toFixed(3)})`;
       }),
     [bus],
   );

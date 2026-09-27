@@ -55,7 +55,7 @@ export const FINDINGS: Finding[] = [
     pre: { kind: 'new', note: `Not on visit ${VISIT.previous} record` },
     recheck: true,
     post: { kind: 'alert', note: 'Confirmed new damage · owner notified' },
-    tFound: 0.174,
+    tFound: 0.171,
     tResolved: 0.876,
   },
   {
@@ -66,7 +66,7 @@ export const FINDINGS: Finding[] = [
     pre: { kind: 'alert', note: 'Owner alert queued · recheck lens' },
     recheck: true,
     post: { kind: 'alert', note: 'Still out · owner notified' },
-    tFound: 0.18,
+    tFound: 0.174,
     tResolved: 0.883,
   },
   {
@@ -77,7 +77,7 @@ export const FINDINGS: Finding[] = [
     pre: { kind: 'known', note: 'Logged visit 4 · unchanged' },
     recheck: false,
     post: { kind: 'known', note: 'Unchanged since visit 4' },
-    tFound: 0.186,
+    tFound: 0.177,
     tResolved: 0.89,
   },
   {
@@ -88,7 +88,7 @@ export const FINDINGS: Finding[] = [
     pre: { kind: 'check', note: 'Could be debris · recheck clean' },
     recheck: true,
     post: { kind: 'ok', note: 'Road debris, not damage · cleared' },
-    tFound: 0.191,
+    tFound: 0.18,
     tResolved: 0.896,
   },
   {
@@ -99,7 +99,7 @@ export const FINDINGS: Finding[] = [
     pre: { kind: 'check', note: 'Targeted clean planned' },
     recheck: true,
     post: { kind: 'ok', note: 'Cleared by targeted pass' },
-    tFound: 0.196,
+    tFound: 0.183,
     tResolved: 0.902,
   },
 ];
