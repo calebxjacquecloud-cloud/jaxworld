@@ -17,7 +17,44 @@ const SITES: [number, number][] = [
   [22, 74],
 ];
 const HUB: [number, number] = [0, -205];
-const MORE_AT = 2.25;
+
+/*
+ * Beat timing (scene units). One even rhythm: each step gets room to land
+ * before the next one starts, and the camera pulls back as the network grows.
+ */
+const T = {
+  ship: [0.45, 1.1],
+  install: [1.1, 1.6],
+  connect: [1.6, 2.2],
+  open: [2.2, 2.6],
+  grow: [2.7, 3.9],
+  lines: 4.25,
+  roles: 5.75,
+} as const;
+
+/** Camera stops for the art (viewBox centre + width; height follows the 580:440 frame). */
+const VIEWS = [
+  { t: 0, x: 0, y: -4, w: 250 },
+  { t: T.install[1], x: 0, y: -4, w: 250 },
+  { t: T.connect[1], x: 0, y: -92, w: 400 },
+  { t: T.open[1], x: 0, y: -92, w: 400 },
+  { t: T.grow[1] + 0.2, x: 0, y: -42, w: 580 },
+];
+const ASPECT = 440 / 580;
+
+function viewAt(t: number) {
+  let i = 1;
+  while (i < VIEWS.length - 1 && t > VIEWS[i].t) i++;
+  const a = VIEWS[i - 1];
+  const b = VIEWS[i];
+  const u = ramp(t, a.t, b.t);
+  const e = u * u * (3 - 2 * u);
+  const w = Math.exp(Math.log(a.w) + (Math.log(b.w) - Math.log(a.w)) * e);
+  const x = a.x + (b.x - a.x) * e;
+  const y = a.y + (b.y - a.y) * e;
+  const h = w * ASPECT;
+  return `${(x - w / 2).toFixed(2)} ${(y - h / 2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`;
+}
 
 function link(i: number) {
   const [x, z] = SITES[i];
@@ -26,6 +63,9 @@ function link(i: number) {
   const my = Math.min(sy, hy) - 30;
   return `M${sx},${sy} Q${(sx + hx) / 2},${my} ${hx},${hy + 16}`;
 }
+
+/** When each of the other sites lands, and when its link draws. */
+const siteAt = (k: number) => T.grow[0] + 0.1 + k * 0.14;
 
 /**
  * ACT 9 · Why standardization matters. One location becomes several; Jax World
@@ -36,40 +76,45 @@ export default function Franchise() {
   return (
     <ScrollScene
       id="franchise"
-      units={5.6}
+      units={7}
       chapter={4}
       label="Franchise model"
       className="vx-split"
       onFrame={(t, root) => {
-        const drop = root.querySelector<SVGGElement>('[data-drop]');
-        if (drop) drop.style.transform = `translate(0px, ${(-(1 - ramp(t, 0.7, 1.05)) * 140).toFixed(1)}px)`;
+        root.querySelector('svg.vx-iso')?.setAttribute('viewBox', viewAt(t));
+        // units lower into place (eased), instead of popping in
+        root.querySelectorAll<SVGGElement>('[data-drop]').forEach((g) => {
+          const [a, b, d] = (g.dataset.drop || '0,1,0').split(',').map(Number);
+          const u = 1 - ramp(t, a, b);
+          g.style.transform = `translate(0px, ${(-(u * u) * d).toFixed(1)}px)`;
+        });
       }}
     >
       <div className="vx-split__copy">
         <div className="vx-swap">
-          <div className="vx-in vx-stack-gap" data-in={-1} data-out={3.2}>
+          <div className="vx-in vx-stack-gap" data-in={-1} data-out={T.lines - 0.05}>
             <p className="vx-eyebrow">Franchise model · proposed</p>
             <h2 className="vx-h2">One system. Repeated everywhere.</h2>
             <ol className="vx-chain mono">
-              <On as="li" a={0.35} b={0.7}>{COM}</On>
-              <On as="li" a={0.7} b={1.15}>Ship</On>
-              <On as="li" a={1.15} b={1.45}>Install</On>
-              <On as="li" a={1.45} b={1.75}>Connect</On>
-              <On as="li" a={1.75} b={MORE_AT}>Open</On>
+              <On as="li" a={0.1} b={T.ship[0]}>{COM}</On>
+              <On as="li" a={T.ship[0]} b={T.install[0]}>Ship</On>
+              <On as="li" a={T.install[0]} b={T.connect[0]}>Install</On>
+              <On as="li" a={T.connect[0]} b={T.open[0]}>Connect</On>
+              <On as="li" a={T.open[0]} b={T.grow[0]}>Open</On>
             </ol>
-            <In as="p" at={MORE_AT} className="vx-body">
+            <In as="p" at={T.grow[0]} className="vx-body">
               A standardized unit means each new location can start from the same machine, the same software and the same playbook as the first.
             </In>
           </div>
-          <div className="vx-in vx-stack-gap" data-in={3.25} data-out={4.4}>
+          <div className="vx-in vx-stack-gap" data-in={T.lines} data-out={T.roles - 0.05}>
             <p className="vx-eyebrow">Franchise model · proposed</p>
             <p className="vx-h2 vx-lines">
-              <In as="span" at={3.3}>Jax World standardizes the machine.</In>
-              <In as="span" at={3.55}>Franchisees scale the locations.</In>
-              <In as="span" at={3.8} className="vx-accent">Jax World connects and improves the network.</In>
+              <In as="span" at={T.lines}>Jax World standardizes the machine.</In>
+              <In as="span" at={T.lines + 0.4}>Franchisees scale the locations.</In>
+              <In as="span" at={T.lines + 0.8} className="vx-accent">Jax World connects and improves the network.</In>
             </p>
           </div>
-          <div className="vx-in vx-stack-gap" data-in={4.45}>
+          <div className="vx-in vx-stack-gap" data-in={T.roles}>
             <p className="vx-eyebrow">Franchise model · proposed</p>
             <p className="vx-h3">Who does what</p>
             <div className="vx-roles">
@@ -99,7 +144,7 @@ export default function Franchise() {
       </div>
 
       <div className="vx-split__art" aria-hidden="true">
-        <svg viewBox="-290 -262 580 440" className="vx-iso">
+        <svg viewBox={viewAt(0)} className="vx-iso">
           {/* links to Jax World */}
           {SITES.map((_, i) => (
             <path
@@ -107,27 +152,27 @@ export default function Franchise() {
               d={link(i)}
               pathLength={1}
               className="vx-link"
-              data-draw={i === 0 ? '1.45,1.75' : `${MORE_AT + 0.2 + i * 0.1},${MORE_AT + 0.5 + i * 0.1}`}
+              data-draw={i === 0 ? `${T.connect[0] + 0.15},${T.connect[1]}` : `${siteAt(i - 1) + 0.25},${siteAt(i - 1) + 0.7}`}
             />
           ))}
-          {/* the first site: empty pad → container arrives → it deploys → connects → opens */}
+          {/* the first site: empty pad → container lowers in → it deploys → connects → opens */}
           <G at={-1}>
             <polygon className="vx-iso-pad vx-iso-pad--empty" points={isoBox(-11, 0, -8, 22, 0, 16, S).top} />
           </G>
-          <G at={0.62} out={1.25}>
-            <g data-drop>
+          <G at={T.ship[0] - 0.12} out={T.install[0] + 0.3}>
+            <g data-drop={`${T.ship[0]},${T.ship[1]},150`}>
               <polygon className="vx-iso-left" points={box.left} />
               <polygon className="vx-iso-right" points={box.right} />
               <polygon className="vx-iso-top vx-iso-top--closed" points={box.top} />
             </g>
           </G>
-          <G at={1.15}>
+          <G at={T.install[0] + 0.05}>
             <IsoSite x={0} z={0} s={S} />
           </G>
-          <G at={1.6}>
+          <G at={T.connect[1] - 0.05}>
             <circle cx={isoPoint(0, 5.5, 0, S)[0]} cy={isoPoint(0, 5.5, 0, S)[1]} r={3.4} className="vx-iso-beacon is-lit" />
           </G>
-          <G at={1.8}>
+          <G at={T.open[0]}>
             <g transform={`translate(${isoPoint(0, 0, 9, S).join(',')})`}>
               <rect x={-18} y={4} width={36} height={14} rx={3} className="vx-open" />
               <text x={0} y={14.2} className="vx-open__t">
@@ -135,13 +180,15 @@ export default function Franchise() {
               </text>
             </g>
           </G>
-          {/* the network grows */}
+          {/* the network grows: each site lowers in, then connects */}
           {SITES.slice(1).map(([x, z], k) => (
-            <G key={k} at={MORE_AT + k * 0.1}>
-              <IsoSite x={x} z={z} s={S} lit />
+            <G key={k} at={siteAt(k)}>
+              <g data-drop={`${siteAt(k)},${siteAt(k) + 0.35},60`}>
+                <IsoSite x={x} z={z} s={S} lit />
+              </g>
             </G>
           ))}
-          <G at={1.35}>
+          <G at={T.connect[0]}>
             <g transform={`translate(${HUB[0]},${HUB[1]})`}>
               <circle r={17} className="vx-hub" />
               <Burst r={11} />

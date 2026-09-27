@@ -84,7 +84,12 @@ export default function ScrollScene({
         c.el.classList.toggle('is-on', t >= c.a && t < c.b);
         c.el.classList.toggle('is-done', t >= c.b);
       }
-      for (const c of refs.draws) c.el.style.strokeDashoffset = (1 - ramp(t, c.a, c.b)).toFixed(4);
+      for (const c of refs.draws) {
+        const u = ramp(t, c.a, c.b);
+        c.el.style.strokeDashoffset = (1 - u).toFixed(4);
+        // fully hidden until it starts drawing (dash patterns can leak slivers when zoomed)
+        c.el.style.visibility = u > 0 ? 'visible' : 'hidden';
+      }
       cb.current?.(t, root);
     };
     const frame = (now: number) => {
